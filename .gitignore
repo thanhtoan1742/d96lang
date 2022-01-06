@@ -1,0 +1,6 @@
+__pycache__/
+*.class
+
+/src/test/solutions/
+/src/test/testcases/
+/target/
