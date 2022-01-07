@@ -1,6 +1,7 @@
 __pycache__/
 *.class
 
+/docs/statements/
 /src/test/solutions/
 /src/test/testcases/
 /target/
