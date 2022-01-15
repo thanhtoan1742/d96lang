@@ -8,18 +8,14 @@ from lexererr import *
 def emit(self):
     tk = self.type
     result = super().emit()
-    if tk == self.UNCLOSE_STRING:
-        raise UncloseString(result.text.strip()[1:])
-    if tk == self.ILLEGAL_ESCAPE_STRING_LITERAL:
-        raise IllegalEscape(result.text[1:])
+    if tk == self.UNCLOSE_STR:
+        raise UncloseString(result.text)
+    if tk == self.ILLEGAL_ESC_STR_LIT:
+        raise IllegalEscape(result.text)
     if tk == self.ERROR_CHAR:
         raise ErrorToken(result.text)
     if tk == self.UNTERMINATED_COMMENT:
         raise UnterminatedComment()
-    if tk == self.INT_LITERAL or tk == self.FLOAT_LITERAL:
-        result.text = result.text.replace('_', '')
-    if tk == self.STRING_LITERAL:
-        result.text = result.text[1:-1]
     return result
 }
 
@@ -27,27 +23,32 @@ options {
 	language = Python3;
 }
 
-program:;
+program: exp EOF;
 
-expression
-    : TRUE
-	| FALSE
+exp
+    : array
+    | BOOLEAN_LITERAL
 	| NULL
-	| INT_LITERAL
-	| FLOAT_LITERAL
-	| STRING_LITERAL
-    | IDENTIFIER
+	| INT_LIT
+	| FLOAT_LIT
+	| STR_LIT
+    | ID
     ;
+
+// TODO: test this
+comma_exps: (exp (COMMA exp)*)?;
+
+array: ARR LP comma_exps RP;
 
 EQUAL: '=';
 COLON: ':';
-SEMICOLON: ';';
+SEMI: ';';
 COMMA: ',';
-CURLY_BRACKET_OPEN: '{';
-CURLY_BRACKET_CLOSE: '}';
-ROUND_BRACKET_OPEN: '(';
-ROUND_BRACKET_CLOSE: ')';
-BLOCK_COMENT_DELIMITER: '##';
+LB: '{';
+RB: '}';
+LP: '(';
+RP: ')';
+COMMENT_DELIM: '##';
 
 CLASS: 'Class';
 VAL: 'Val';
@@ -56,51 +57,61 @@ VAR: 'Var';
 BREAK: 'Break';
 CONTINUE: 'Continue';
 IF: 'If';
-ELSEIF: 'Elseif';
+ELIF: 'Elseif';
 ELSE: 'Else';
 FOREACH: 'Foreach';
 
-ARRAY: 'Array';
+ARR: 'Array';
 INT: 'Int';
 FLOAT: 'Float';
-BOOLEAN: 'Boolean';
-STRING: 'String';
+BOOL: 'Boolean';
+STR: 'String';
 
-TRUE: 'True';
-FALSE: 'False';
+BOOLEAN_LITERAL: 'True' | 'False';
 
 NULL: 'Null';
 
-fragment DEC_INTEGER: [1-9] [0-9_]* [0-9];
-fragment OCT_INTEGER: '0' [0-9_]* [0-9];
-fragment HEX_INTEGER: '0' [xX] [0-9a-fA-F_]+ [0-9a-fA-F];
-fragment BIN_INTEGER: '0' [bB] [01_]* [01];
-INT_LITERAL
-    : DEC_INTEGER
-	| OCT_INTEGER
-	| HEX_INTEGER
-	| BIN_INTEGER
+fragment DEC_INT: [1-9] [0-9_]* [0-9];
+fragment OCT_INT: '0' [0-9_]* [0-9];
+fragment HEX_INT: '0' [xX] [0-9a-fA-F_]+ [0-9a-fA-F];
+fragment BIN_INT: '0' [bB] [01_]* [01];
+INT_LIT
+    : DEC_INT
+    | OCT_INT
+    | HEX_INT
+    | BIN_INT
+    {self.text = self.text.replace('_', '')}
     ;
 
-fragment FLOAT_INTEGER_PART: INT_LITERAL;
-fragment FLOAT_DECIMAL_PART: '.' FLOAT_INTEGER_PART?;
-fragment FLOAT_EXPONENT_PART: [eE] [+-]? FLOAT_INTEGER_PART;
-FLOAT_LITERAL
-    : FLOAT_INTEGER_PART FLOAT_DECIMAL_PART FLOAT_EXPONENT_PART
-	| FLOAT_INTEGER_PART FLOAT_DECIMAL_PART
-	| FLOAT_INTEGER_PART FLOAT_EXPONENT_PART
-	| FLOAT_DECIMAL_PART FLOAT_EXPONENT_PART
+fragment FLOAT_INT_PART: INT_LIT;
+fragment FLOAT_DEC_PART: '.' FLOAT_INT_PART?;
+fragment FLOAT_EXP_PART: [eE] [+-]? FLOAT_INT_PART;
+FLOAT_LIT
+    : FLOAT_INT_PART FLOAT_DEC_PART FLOAT_EXP_PART
+	| FLOAT_INT_PART FLOAT_DEC_PART
+	| FLOAT_INT_PART FLOAT_EXP_PART
+	| FLOAT_DEC_PART FLOAT_EXP_PART
+    {self.text = self.text.replace('_', '')}
     ;
 
-fragment NOT_ESCAPE_SEQUENCE: ~[\n\r\f\\];
-fragment ESCAPE_SEQUENCE: '\\' [bfnrt'\\] | '\'"';
-STRING_LITERAL: '"' (ESCAPE_SEQUENCE | NOT_ESCAPE_SEQUENCE)* '"';
-fragment ILLEGAL_ESCAPE_SEQUENCE: '\\' ~[bfnrt'\\] | '\'' ~["];
-ILLEGAL_ESCAPE_STRING_LITERAL: '"' (ESCAPE_SEQUENCE | NOT_ESCAPE_SEQUENCE)* ILLEGAL_ESCAPE_SEQUENCE;
-UNCLOSE_STRING: '"' (ESCAPE_SEQUENCE | NOT_ESCAPE_SEQUENCE)*;
+fragment NOT_ESC_SEQ: ~[\b\f\n\r\t\\];
+fragment ESC_SEQ: '\\' [bfnrt'\\] | '\'"';
+fragment ILLEGAL_ESC_SEQ: '\\' ~[bfnrt'\\] | '\'' ~["];
+ILLEGAL_ESC_STR_LIT
+    : '"' (ESC_SEQ | NOT_ESC_SEQ)* ILLEGAL_ESC_SEQ
+    {self.text = self.text[1:]}
+    ;
+UNCLOSE_STR
+    : '"' (ESC_SEQ | NOT_ESC_SEQ)*
+    {self.text = self.text.strip()[1:]}
+    ;
+STR_LIT
+    : '"' (ESC_SEQ | NOT_ESC_SEQ)* '"'
+    {self.text = self.text[1:-1]}
+    ;
 
 // STATIC_MODIFIER: '$'; can attribute identifier = method identifier?
-IDENTIFIER: '$'? [a-zA-Z_] ([a-zA-Z_] | [0-9])*;
+ID: '$'? [a-zA-Z_] ([a-zA-Z_] | [0-9])*;
 
 // 3.1 '\n' is used as newline character by compiler.
 WS: [ \t\r\n\b\f]+ -> skip; // skip spaces, tabs, newlines
