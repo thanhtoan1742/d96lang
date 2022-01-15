@@ -3,6 +3,8 @@ from TestUtils import TestLexer
 
 
 def write_expect(expect, num):
+    from pathlib import Path
+    Path('./test/expects/').mkdir(parents=True, exist_ok=True)
     path = './test/expects/' + str(num) + '.txt'
     open(path, 'w+').write(expect)
 
@@ -18,7 +20,7 @@ class LexerSuite(unittest.TestCase):
         try:
             self.assertTrue(TestLexer.test(testcase, expect, LexerSuite.counter))
         except AssertionError:
-            raise AssertionError(f"{LexerSuite.marker} Failed at test: {LexerSuite.counter}")
+            raise AssertionError(f"{LexerSuite.marker} lexer failed at test: {LexerSuite.counter}")
 
 
     # sample test in BKeL
@@ -50,38 +52,4 @@ class LexerSuite(unittest.TestCase):
     def test_sample_5(self):
         testcase = """ "abc def  """
         expect = """Unclosed String: abc def"""
-        self._test(testcase, expect)
-
-    def test_sample_6(self):
-        testcase = \
-"""
-class main{}
-"""
-        expect = """successful"""
-        self._test(testcase, expect)
-
-
-    def test_sample_7(self):
-        testcase = \
-"""
-class Rectangle: Shape {
-    getArea() {
-        Return self.length * self.width;
-    }
-}
-"""
-        expect = "successful"
-        self._test(testcase, expect)
-
-
-    def test_sample_8(self):
-        testcase = \
-"""
-    class Shape {
-        $getNumOfShape( {
-            Return self.length * self.width;
-        }
-    }
-"""
-        expect = "Error on line 3 col 40: {"
         self._test(testcase, expect)
