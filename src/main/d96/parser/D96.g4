@@ -6,32 +6,40 @@ from lexererr import *
 
 @lexer::members {
 def emit(self):
-    tk = self.type
-    result = super().emit()
-    if tk == self.UNCLOSE_STR:
-        raise UncloseString(result.text)
-    if tk == self.ILLEGAL_ESC_STR_LIT:
-        raise IllegalEscape(result.text)
-    if tk == self.ERROR_CHAR:
-        raise ErrorToken(result.text)
-    if tk == self.UNTERMINATED_COMMENT:
+    token = super().emit()
+    typ = token.type
+
+    if typ == self.UNCLOSE_STR:
+        raise UncloseString(token.text.strip()[1:])
+    if typ == self.ILLEGAL_ESC_STR_LIT:
+        raise IllegalEscape(token.text[1:])
+    if typ == self.UNTERMINATED_COMMENT:
         raise UnterminatedComment()
-    return result
+    if typ == self.ERROR_CHAR:
+        raise ErrorToken(token.text)
+
+    if typ == self.COMMENT:
+        token.text = token.text[2:-2]
+    if typ == self.INT_LIT or typ == self.FLOAT_LIT:
+        token.text = token.text.replace('_', '')
+    if typ == self.STR_LIT:
+        token.text = token.text[1:-1]
+    return token
 }
 
 options {
 	language = Python3;
 }
 
-program: exp EOF;
+program: ;
 
 exp
     : array
     | BOOLEAN_LITERAL
-	| NULL
-	| INT_LIT
-	| FLOAT_LIT
-	| STR_LIT
+    | NULL
+    | INT_LIT
+    | FLOAT_LIT
+    | STR_LIT
     | ID
     ;
 
@@ -71,50 +79,40 @@ BOOLEAN_LITERAL: 'True' | 'False';
 
 NULL: 'Null';
 
+fragment COMMENT_BODY: (~'#' | '#' ~'#')*;
+COMMENT: COMMENT_DELIM COMMENT_BODY COMMENT_DELIM;
+UNTERMINATED_COMMENT: COMMENT_DELIM COMMENT_BODY;
+
+
 fragment DEC_INT: [1-9] [0-9_]* [0-9];
 fragment OCT_INT: '0' [0-9_]* [0-9];
 fragment HEX_INT: '0' [xX] [0-9a-fA-F_]+ [0-9a-fA-F];
 fragment BIN_INT: '0' [bB] [01_]* [01];
-INT_LIT
-    : DEC_INT
-    | OCT_INT
-    | HEX_INT
-    | BIN_INT
-    {self.text = self.text.replace('_', '')}
-    ;
+INT_LIT:DEC_INT | OCT_INT | HEX_INT | BIN_INT;
 
 fragment FLOAT_INT_PART: INT_LIT;
 fragment FLOAT_DEC_PART: '.' FLOAT_INT_PART?;
 fragment FLOAT_EXP_PART: [eE] [+-]? FLOAT_INT_PART;
 FLOAT_LIT
     : FLOAT_INT_PART FLOAT_DEC_PART FLOAT_EXP_PART
-	| FLOAT_INT_PART FLOAT_DEC_PART
-	| FLOAT_INT_PART FLOAT_EXP_PART
-	| FLOAT_DEC_PART FLOAT_EXP_PART
-    {self.text = self.text.replace('_', '')}
+    | FLOAT_INT_PART FLOAT_DEC_PART
+    | FLOAT_INT_PART FLOAT_EXP_PART
+    | FLOAT_DEC_PART FLOAT_EXP_PART
     ;
 
 fragment NOT_ESC_SEQ: ~[\b\f\n\r\t\\];
 fragment ESC_SEQ: '\\' [bfnrt'\\] | '\'"';
 fragment ILLEGAL_ESC_SEQ: '\\' ~[bfnrt'\\] | '\'' ~["];
-ILLEGAL_ESC_STR_LIT
-    : '"' (ESC_SEQ | NOT_ESC_SEQ)* ILLEGAL_ESC_SEQ
-    {self.text = self.text[1:]}
-    ;
-UNCLOSE_STR
-    : '"' (ESC_SEQ | NOT_ESC_SEQ)*
-    {self.text = self.text.strip()[1:]}
-    ;
-STR_LIT
-    : '"' (ESC_SEQ | NOT_ESC_SEQ)* '"'
-    {self.text = self.text[1:-1]}
-    ;
+STR_LIT: '"' (ESC_SEQ | NOT_ESC_SEQ)* '"';
+ILLEGAL_ESC_STR_LIT: '"' (ESC_SEQ | NOT_ESC_SEQ)* ILLEGAL_ESC_SEQ;
+UNCLOSE_STR: '"' (ESC_SEQ | NOT_ESC_SEQ)*;
 
 // STATIC_MODIFIER: '$'; can attribute identifier = method identifier?
 ID: '$'? [a-zA-Z_] ([a-zA-Z_] | [0-9])*;
+
+
 
 // 3.1 '\n' is used as newline character by compiler.
 WS: [ \t\r\n\b\f]+ -> skip; // skip spaces, tabs, newlines
 
 ERROR_CHAR: .;
-UNTERMINATED_COMMENT: .;
