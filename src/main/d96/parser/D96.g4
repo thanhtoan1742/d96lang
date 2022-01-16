@@ -1,5 +1,9 @@
 grammar D96;
 
+options {
+	language = Python3;
+}
+
 @lexer::header {
 from lexererr import *
 }
@@ -29,10 +33,7 @@ def emit(self):
     return token
 }
 
-options {
-	language = Python3;
-}
-
+// PARSER
 program: ;
 
 exp
@@ -50,7 +51,30 @@ comma_exps: (exp (COMMA exp)*)?;
 
 array: ARR LP comma_exps RP;
 
-EQUAL: '=';
+
+
+// LEXER
+ADD_OP: '+';
+SUB_OP: '-';
+MUL_OP: '*';
+DIV_OP: '/';
+MOD_OP: '%';
+NOT_OP: '!';
+LGC_AND: '&&';
+LGC_OR: '||';
+EQ: '=';
+EQEQ: '==';
+NOT_EQ: '!=';
+GT: '>';
+LT: '<';
+GE: '>=';
+LE: '<=';
+DOT: '.';
+EQEQ_DOT: '==.';
+ADD_DOT: '+.';
+COLON_COLON: '::';
+NEW: 'new';
+
 COLON: ':';
 SEMI: ';';
 COMMA: ',';
@@ -58,6 +82,8 @@ LB: '{';
 RB: '}';
 LP: '(';
 RP: ')';
+LK: '[';
+RK: ']';
 COMMENT_DELIM: '##';
 
 CLASS: 'Class';
@@ -83,7 +109,7 @@ NULL: 'Null';
 
 fragment COMMENT_BODY: (~'#' | '#' ~'#')*;
 COMMENT: COMMENT_DELIM COMMENT_BODY COMMENT_DELIM;
-// UNTERMINATED_COMMENT: COMMENT_DELIM COMMENT_BODY;
+UNTERMINATED_COMMENT: COMMENT_DELIM COMMENT_BODY;
 
 
 fragment DEC_INT: [1-9] [0-9_]* [0-9];

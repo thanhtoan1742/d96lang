@@ -103,3 +103,6 @@ line
         testcase = """## 2 consecutive comments with some thing in between ## Val Var ## the second comment ##"""
         expect = """ 2 consecutive comments with some thing in between ,Val,Var, the second comment ,<EOF>"""
         self._test(testcase, expect)
+
+
+    # TODO: create tests that check matching every token
