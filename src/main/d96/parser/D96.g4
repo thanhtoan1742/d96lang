@@ -60,20 +60,20 @@ MUL_OP: '*';
 DIV_OP: '/';
 MOD_OP: '%';
 NOT_OP: '!';
-LGC_AND: '&&';
-LGC_OR: '||';
-EQ: '=';
-EQEQ: '==';
-NOT_EQ: '!=';
-GT: '>';
-LT: '<';
-GE: '>=';
-LE: '<=';
-DOT: '.';
-EQEQ_DOT: '==.';
-ADD_DOT: '+.';
-COLON_COLON: '::';
-NEW: 'new';
+AND_OP: '&&';
+OR_OP: '||';
+EQ_OP: '=';
+EQEQ_OP: '==';
+NOT_EQ_OP: '!=';
+GT_OP: '>';
+LT_OP: '<';
+GE_OP: '>=';
+LE_OP: '<=';
+DOT_OP: '.';
+EQEQ_DOT_OP: '==.';
+ADD_DOT_OP: '+.';
+COLON_COLON_OP: '::';
+NEW_OP: 'new';
 
 COLON: ':';
 SEMI: ';';
@@ -86,16 +86,21 @@ LK: '[';
 RK: ']';
 COMMENT_DELIM: '##';
 
-CLASS: 'Class';
-VAL: 'Val';
-VAR: 'Var';
-
 BREAK: 'Break';
 CONTINUE: 'Continue';
 IF: 'If';
 ELIF: 'Elseif';
 ELSE: 'Else';
 FOREACH: 'Foreach';
+IN: 'IN';
+RETURN: 'Return';
+CLASS: 'Class';
+VAL: 'Val';
+VAR: 'Var';
+CONSTRUCTOR: 'Constructor';
+DESSTRUCTOR: 'Destructor';
+NEW: 'New';
+BY: 'By';
 
 ARR: 'Array';
 INT: 'Int';
@@ -135,9 +140,9 @@ STR_LIT: '"' (ESC_SEQ | NOT_ESC_SEQ)* '"';
 ILLEGAL_ESCAPE: '"' (ESC_SEQ | NOT_ESC_SEQ)* ILLEGAL_ESC_SEQ;
 UNCLOSE_STRING: '"' (ESC_SEQ | NOT_ESC_SEQ)*;
 
+
 // STATIC_MODIFIER: '$'; can attribute identifier = method identifier?
 ID: '$'? [a-zA-Z_] ([a-zA-Z_] | [0-9])*;
-
 
 
 // 3.1 '\n' is used as newline character by compiler.
