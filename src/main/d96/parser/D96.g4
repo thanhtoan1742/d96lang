@@ -9,14 +9,16 @@ def emit(self):
     token = super().emit()
     typ = token.type
 
-    if typ == self.UNCLOSE_STR:
-        raise UncloseString(token.text.strip()[1:])
-    if typ == self.ILLEGAL_ESC_STR_LIT:
-        raise IllegalEscape(token.text[1:])
-    if typ == self.UNTERMINATED_COMMENT:
-        raise UnterminatedComment()
-    if typ == self.ERROR_CHAR:
+    if typ == self.ERROR_TOKEN:
         raise ErrorToken(token.text)
+    if typ == self.UNCLOSE_STRING:
+        raise UncloseString(token.text.strip()[1:])
+    if typ == self.ILLEGAL_ESCAPE:
+        raise IllegalEscape(token.text[1:])
+
+    # statement tells not to do unterminated comment
+    # if typ == self.UNTERMINATED_COMMENT:
+    #     raise UnterminatedComment()
 
     if typ == self.COMMENT:
         token.text = token.text[2:-2]
@@ -81,7 +83,7 @@ NULL: 'Null';
 
 fragment COMMENT_BODY: (~'#' | '#' ~'#')*;
 COMMENT: COMMENT_DELIM COMMENT_BODY COMMENT_DELIM;
-UNTERMINATED_COMMENT: COMMENT_DELIM COMMENT_BODY;
+// UNTERMINATED_COMMENT: COMMENT_DELIM COMMENT_BODY;
 
 
 fragment DEC_INT: [1-9] [0-9_]* [0-9];
@@ -104,8 +106,8 @@ fragment NOT_ESC_SEQ: ~[\b\f\n\r\t\\];
 fragment ESC_SEQ: '\\' [bfnrt'\\] | '\'"';
 fragment ILLEGAL_ESC_SEQ: '\\' ~[bfnrt'\\] | '\'' ~["];
 STR_LIT: '"' (ESC_SEQ | NOT_ESC_SEQ)* '"';
-ILLEGAL_ESC_STR_LIT: '"' (ESC_SEQ | NOT_ESC_SEQ)* ILLEGAL_ESC_SEQ;
-UNCLOSE_STR: '"' (ESC_SEQ | NOT_ESC_SEQ)*;
+ILLEGAL_ESCAPE: '"' (ESC_SEQ | NOT_ESC_SEQ)* ILLEGAL_ESC_SEQ;
+UNCLOSE_STRING: '"' (ESC_SEQ | NOT_ESC_SEQ)*;
 
 // STATIC_MODIFIER: '$'; can attribute identifier = method identifier?
 ID: '$'? [a-zA-Z_] ([a-zA-Z_] | [0-9])*;
@@ -115,4 +117,4 @@ ID: '$'? [a-zA-Z_] ([a-zA-Z_] | [0-9])*;
 // 3.1 '\n' is used as newline character by compiler.
 WS: [ \t\r\n\b\f]+ -> skip; // skip spaces, tabs, newlines
 
-ERROR_CHAR: .;
+ERROR_TOKEN: .;

@@ -53,3 +53,39 @@ class LexerSuite(unittest.TestCase):
         testcase = """ "abc def  """
         expect = """Unclosed String: abc def"""
         self._test(testcase, expect)
+
+
+    # my testcase
+    def test_comment_6(self):
+        testcase = """## 123 ##"""
+        expect = """ 123 ,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_commnet_7(self):
+        testcase = \
+"""## multiline
+comment ##
+"""
+        expect = \
+""" multiline
+comment ,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_commnet_8(self):
+        testcase = \
+"""## multi
+multi
+    multi
+       multi
+line
+  comment##
+"""
+        expect = \
+""" multi
+multi
+    multi
+       multi
+line
+  comment,<EOF>"""
+        self._test(testcase, expect)
+
