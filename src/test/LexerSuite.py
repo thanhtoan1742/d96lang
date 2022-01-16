@@ -56,6 +56,7 @@ class LexerSuite(unittest.TestCase):
 
 
     # my testcase
+    # comment
     def test_comment_6(self):
         testcase = """## 123 ##"""
         expect = """ 123 ,<EOF>"""
@@ -103,6 +104,43 @@ line
         testcase = """## 2 consecutive comments with some thing in between ## Val Var ## the second comment ##"""
         expect = """ 2 consecutive comments with some thing in between ,Val,Var, the second comment ,<EOF>"""
         self._test(testcase, expect)
+
+
+    # int literal
+    def test_int_lit_12(self):
+        testcase = """1234567890"""
+        expect = """1234567890,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_13(self):
+        testcase = """1_234_567_890"""
+        expect = """1234567890,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_14(self):
+        testcase = """1_23___4__5_6___7_89___0"""
+        expect = """1234567890,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_15(self):
+        """
+        NOTE:
+        currently, this test gives '1234567890' as INT_LIT
+        and '_' as ID, it should give an error, something like 'int literal not correct'
+        but the statement does not define how to handle this kind of error.
+
+        """
+        return
+        testcase = """1_23___4__5_6___7_89___0_"""
+        expect = """1234567890,<EOF>"""
+        self._test(testcase, expect)
+
+
+    def test_int_lit_16(self):
+        testcase = """0x1"""
+        expect = """0x1,<EOF>"""
+        self._test(testcase, expect)
+
 
 
     # TODO: create tests that check matching every token

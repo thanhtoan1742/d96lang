@@ -119,9 +119,9 @@ UNTERMINATED_COMMENT: COMMENT_DELIM COMMENT_BODY;
 
 fragment DEC_INT: [1-9] [0-9_]* [0-9];
 fragment OCT_INT: '0' [0-9_]* [0-9];
-fragment HEX_INT: '0' [xX] [0-9a-fA-F_]+ [0-9a-fA-F];
+fragment HEX_INT: '0' [xX] [0-9a-fA-F_]* [0-9a-fA-F];
 fragment BIN_INT: '0' [bB] [01_]* [01];
-INT_LIT:DEC_INT | OCT_INT | HEX_INT | BIN_INT;
+INT_LIT: DEC_INT | OCT_INT | HEX_INT | BIN_INT;
 
 fragment FLOAT_INT_PART: INT_LIT;
 fragment FLOAT_DEC_PART: '.' FLOAT_INT_PART?;
@@ -147,5 +147,6 @@ ID: '$'? [a-zA-Z_] ([a-zA-Z_] | [0-9])*;
 
 // 3.1 '\n' is used as newline character by compiler.
 WS: [ \t\r\n\b\f]+ -> skip; // skip spaces, tabs, newlines
+// WS: [ \t\r\n\b\f]+;
 
 ERROR_TOKEN: .;
