@@ -61,7 +61,7 @@ class LexerSuite(unittest.TestCase):
         expect = """ 123 ,<EOF>"""
         self._test(testcase, expect)
 
-    def test_commnet_7(self):
+    def test_comment_7(self):
         testcase = \
 """## multiline
 comment ##
@@ -71,7 +71,7 @@ comment ##
 comment ,<EOF>"""
         self._test(testcase, expect)
 
-    def test_commnet_8(self):
+    def test_comment_8(self):
         testcase = \
 """## multi
 multi
@@ -89,3 +89,17 @@ line
   comment,<EOF>"""
         self._test(testcase, expect)
 
+    def test_comment_9(self):
+        testcase = """## keywords in comment are ignored: Val Var Int Float For If Else ##"""
+        expect = """ keywords in comment are ignored: Val Var Int Float For If Else ,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_comment_10(self):
+        testcase = """##2 consecutive comments##  ## the second comment ##"""
+        expect = """2 consecutive comments, the second comment ,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_comment_11(self):
+        testcase = """## 2 consecutive comments with some thing in between ## Val Var ## the second comment ##"""
+        expect = """ 2 consecutive comments with some thing in between ,Val,Var, the second comment ,<EOF>"""
+        self._test(testcase, expect)
