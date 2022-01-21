@@ -24,19 +24,33 @@ def emit(self):
     # if typ == self.UNTERMINATED_COMMENT:
     #     raise UnterminatedComment()
 
-    if typ == self.COMMENT:
-        token.text = token.text[2:-2]
-    if typ == self.INT_LIT or typ == self.FLOAT_LIT:
-        token.text = token.text.replace('_', '')
     if typ == self.STR_LIT:
         token.text = token.text[1:-1]
     return token
 }
 
-// PARSER
-program: ;
 
-exp
+// PARSER
+program: class_decl* EOF;
+
+
+class_decl: CLASS ID (COLON ID)? LB class_mems RB;
+class_mems: (method_decl | attr_decl)*;
+
+attr_decl: mut_mod comma_ids COLON typ (EQ_OP comma_exps)? SEMI;
+mut_mod: VAL | VAR;
+
+method_decl: normal_method_decl | constuctor_decl | destuctor_decl;
+normal_method_decl: ID LP semi_param_decls RP stmt_block;
+constuctor_decl: CONSTRUCTOR LP semi_param_decls RP stmt_block;
+destuctor_decl: DESTRUCTOR LP RP stmt_block;
+semi_param_decls: (comma_ids COLON typ)*;
+
+comma_ids: ID (COMMA ID)*;
+
+typ: INT | FLOAT | STR | BOOL;
+
+exp returns [value]
     : array
     | BOOLEAN_LITERAL
     | NULL
@@ -48,6 +62,9 @@ exp
 
 // TODO: test this
 comma_exps: (exp (COMMA exp)*)?;
+
+stmt_block: LB stmts RB;
+stmts: ;
 
 array: ARR LP comma_exps RP;
 
@@ -98,7 +115,7 @@ CLASS: 'Class';
 VAL: 'Val';
 VAR: 'Var';
 CONSTRUCTOR: 'Constructor';
-DESSTRUCTOR: 'Destructor';
+DESTRUCTOR: 'Destructor';
 NEW: 'New';
 BY: 'By';
 
@@ -113,19 +130,27 @@ BOOLEAN_LITERAL: 'True' | 'False';
 NULL: 'Null';
 
 fragment COMMENT_BODY: (~'#' | '#' ~'#')*;
-COMMENT: COMMENT_DELIM COMMENT_BODY COMMENT_DELIM;
+COMMENT: COMMENT_DELIM COMMENT_BODY COMMENT_DELIM -> skip;
 UNTERMINATED_COMMENT: COMMENT_DELIM COMMENT_BODY;
 
 
-fragment DEC_INT: [1-9] [0-9_]* [0-9];
+// move INT_LIT up
+// make all of them not fragment to let them have their own actions
+fragment DEC_INT: '0' | [1-9] ([0-9_]* [0-9])?;
 fragment OCT_INT: '0' [0-9_]* [0-9];
 fragment HEX_INT: '0' [xX] [0-9a-fA-F_]* [0-9a-fA-F];
 fragment BIN_INT: '0' [bB] [01_]* [01];
-INT_LIT: DEC_INT | OCT_INT | HEX_INT | BIN_INT;
+INT_LIT
+    : DEC_INT
+    | OCT_INT
+    | HEX_INT
+    | BIN_INT
+    ;
 
-fragment FLOAT_INT_PART: INT_LIT;
-fragment FLOAT_DEC_PART: '.' FLOAT_INT_PART?;
-fragment FLOAT_EXP_PART: [eE] [+-]? FLOAT_INT_PART;
+
+fragment FLOAT_INT_PART: DEC_INT;
+fragment FLOAT_DEC_PART: '.' DEC_INT?;
+fragment FLOAT_EXP_PART: [eE] [+-]? DEC_INT;
 FLOAT_LIT
     : FLOAT_INT_PART FLOAT_DEC_PART FLOAT_EXP_PART
     | FLOAT_INT_PART FLOAT_DEC_PART
@@ -133,7 +158,8 @@ FLOAT_LIT
     | FLOAT_DEC_PART FLOAT_EXP_PART
     ;
 
-fragment NOT_ESC_SEQ: ~[\b\f\n\r\t\\];
+
+fragment NOT_ESC_SEQ: ~[\b\f\n\r\t\\"];
 fragment ESC_SEQ: '\\' [bfnrt'\\] | '\'"';
 fragment ILLEGAL_ESC_SEQ: '\\' ~[bfnrt'\\] | '\'' ~["];
 STR_LIT: '"' (ESC_SEQ | NOT_ESC_SEQ)* '"';
