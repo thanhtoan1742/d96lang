@@ -17,10 +17,11 @@ class ParserSuite(unittest.TestCase):
             raise AssertionError(f"{ParserSuite.marker} parser failed at test: {ParserSuite.counter}")
 
 
+    # sample test from BKeL
     def test_sample_1000(self):
         testcase = \
 """
-class main{}
+Class main{}
 """
         expect = """successful"""
         self._test(testcase, expect)
@@ -29,7 +30,7 @@ class main{}
     def test_sample_1001(self):
         testcase = \
 """
-class Rectangle: Shape {
+Class Rectangle: Shape {
     getArea() {
         Return self.length * self.width;
     }
@@ -42,11 +43,46 @@ class Rectangle: Shape {
     def test_sample_1002(self):
         testcase = \
 """
-    class Shape {
+    Class Shape {
         $getNumOfShape( {
             Return self.length * self.width;
         }
     }
 """
         expect = "Error on line 3 col 40: {"
+        self._test(testcase, expect)
+
+
+    # my test
+    def test_class_1003(self):
+        testcase = \
+"""
+Class Program {
+    Val attr1: Int = 0;
+    Var $attr2: String = "asdasd";
+    main() {
+    }
+}
+"""
+        expect = "successful"
+
+    def test_class_1004(self):
+        testcase = \
+"""
+Class Program {
+    Val attr1: Int = 0;
+    Var $attr2: String = "asdasd";
+    Val $attr3, at5: Float;
+
+    $laugh(a, b: String; c: Int) {
+    }
+
+    add() {
+    }
+
+    main() {
+    }
+}
+"""
+        expect = "successful"
         self._test(testcase, expect)
