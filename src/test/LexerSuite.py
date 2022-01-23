@@ -486,3 +486,37 @@ line
 
     # TODO: test 01.01, 1._01, 1.1_, 1e_1, 1e1_, 1.0000, 1.1000, 000.001
 
+
+
+    # bool literal
+    def test_bool_lit_0(self):
+        testcase = """False"""
+        expect = """False,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_bool_lit_1(self):
+        testcase = """True"""
+        expect = """True,<EOF>"""
+        self._test(testcase, expect)
+
+
+
+    # string literal
+    def test_str_lit_0(self):
+        testcase = """ "this is a string" """
+        expect = """this is a string,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_str_lit_1(self):
+        testcase = """ "this is a bunch of escape characters: \\b\\f\\r\\n\\t\\'\\\\" """
+        expect = """this is a bunch of escape characters: \\b\\f\\r\\n\\t\\'\\\\,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_str_lit_2(self):
+        testcase = """ "this is a quote escape character: '"" """
+        expect = """this is a quote escape character: '",<EOF>"""
+        self._test(testcase, expect)
+
+    # TODO: add ILLEGAL_ESCAPE and UNCLOSE_STRING test
+
+
