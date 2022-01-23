@@ -55,8 +55,8 @@ class LexerSuite(unittest.TestCase):
         self._test(testcase, expect)
 
 
-    #my testcase
-    #comment
+    # my testcase
+    # comment
     def test_comment_0(self):
         testcase = """## 123 ##"""
         expect = """ 123 ,<EOF>"""
@@ -377,7 +377,7 @@ line
 
 
 
-    #int literal
+    # int literal
     def test_int_lit_0(self):
         testcase = """0"""
         expect = """0,<EOF>"""
@@ -393,7 +393,7 @@ line
         expect = """1234567890,<EOF>"""
         self._test(testcase, expect)
 
-    #TODO: test 123a, 19a2, _123, 123_
+    # TODO: test 123a, 19a2, _123, 123_
 
     def test_int_lit_4(self):
         testcase = """0x0"""
@@ -410,7 +410,7 @@ line
         expect = """0X1234567890ABCDEF,<EOF>"""
         self._test(testcase, expect)
 
-    #TODO: test 0x00, 0xA_AG, 0x_A1, 0_x112, 0x11_
+    # TODO: test 0x00, 0xA_AG, 0x_A1, 0_x112, 0x11_
 
     def test_int_lit_7(self):
         testcase = """00"""
@@ -427,7 +427,7 @@ line
         expect = """012345670,<EOF>"""
         self._test(testcase, expect)
 
-    #TODO: test 000, 07_18, 0_21, 023_
+    # TODO: test 000, 07_18, 0_21, 023_
 
     def test_int_lit_10(self):
         testcase = """0b0"""
@@ -444,5 +444,45 @@ line
         expect = """0b10,<EOF>"""
         self._test(testcase, expect)
 
-    #TODO: test 0b00, 0b1_02, 0b_11, 0_b11, 0b11_
+    # TODO: test 0b00, 0b1_02, 0b_11, 0_b11, 0b11_
+
+
+
+    # float literal
+    def test_float_lit_0(self):
+        testcase = """0.0e0"""
+        expect = """0.0e0,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_float_lit_1(self):
+        testcase = """1234567890.0987654321E+1234567890"""
+        expect = """1234567890.0987654321E+1234567890,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_float_lit_2(self):
+        testcase = """1_2_34567_89_0.0987_6_5432_1E-123_456_789_0"""
+        expect = """1234567890.0987654321E-1234567890,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_float_lit_3(self):
+        testcase = """1.000000001e9"""
+        expect = """1.000000001e9,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_float_lit_4(self):
+        testcase = """2e5"""
+        expect = """2e5,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_float_lit_5(self):
+        testcase = """.2e5"""
+        expect = """.2e5,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_float_lit_6(self):
+        testcase = """2.2"""
+        expect = """2.2,<EOF>"""
+        self._test(testcase, expect)
+
+    # TODO: test 01.01, 1._01, 1.1_, 1e_1, 1e1_, 1.0000, 1.1000, 000.001
 

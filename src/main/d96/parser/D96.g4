@@ -179,7 +179,11 @@ INT_LIT
 
 
 fragment FLOAT_INT_PART: DEC_INT;
-fragment FLOAT_DEC_PART: '.' ([0-9] ('_'? [0-9])*)?;
+fragment FLOAT_DEC_PART: '.' (
+    '0'
+    | '0' ('_'? '0')* ('_'? [1-9]) ('_'? [0-9])*
+    | [1-9] ('_'? [0-9])*
+);
 fragment FLOAT_EXP_PART: [eE] [+-]? DEC_INT;
 FLOAT_LIT
     : FLOAT_INT_PART FLOAT_DEC_PART FLOAT_EXP_PART
