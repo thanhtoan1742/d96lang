@@ -32,7 +32,7 @@ Class main{}
 """
 Class Rectangle: Shape {
     getArea() {
-        Return self.length * self.width;
+        Return Self.length * Self.width;
     }
 }
 """
@@ -45,11 +45,11 @@ Class Rectangle: Shape {
 """
     Class Shape {
         $getNumOfShape( {
-            Return self.length * self.width;
+            Return Self.length * Self.width;
         }
     }
 """
-        expect = "Error on line 3 col 40: {"
+        expect = "Error on line 3 col 24: {"
         self._test(testcase, expect)
 
 

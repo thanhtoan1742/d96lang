@@ -1,7 +1,7 @@
 grammar D96;
 
 options {
-	language = Python3;
+    language = Python3;
 }
 
 @lexer::header {
@@ -36,23 +36,30 @@ def emit(self):
 // PARSER
 program: class_decl* EOF;
 
-class_decl: CLASS MEMBER_ID (COLON MEMBER_ID)? LB class_mems RB;
+class_decl: CLASS ID (COLON ID)? LB class_mems RB;
 class_mems: (method_decl | attr_decl)*;
 
-attr_decl: mut_mod comma_member_ids COLON typ (EQ_OP comma_exps)? SEMI;
+attr_decl: mut_mod comma_ids COLON typ (EQ_OP comma_exps)? SEMI;
 mut_mod: VAL | VAR;
 
 method_decl: normal_method_decl | constuctor_decl | destuctor_decl;
-normal_method_decl: MEMBER_ID LP semi_param_decls RP stmt_block;
+normal_method_decl: ID LP semi_param_decls RP stmt_block;
 constuctor_decl: CONSTRUCTOR LP semi_param_decls RP stmt_block;
 destuctor_decl: DESTRUCTOR LP RP stmt_block;
 semi_param_decls: (param_decl (SEMI param_decl)*)?;
-param_decl: comma_member_ids COLON typ;
+param_decl: comma_ids COLON typ;
 
-comma_member_ids: MEMBER_ID (COMMA MEMBER_ID)*;
+comma_ids: ID (COMMA ID)*;
+
+
+
+
 
 // not finished
 typ: INT | FLOAT | STR | BOOL;
+
+
+
 
 stmt_block: LB stmt* RB;
 stmt
@@ -63,42 +70,104 @@ stmt
     | break_stmt
     | continue_stmt
     | return_stmt
-    | method_invoke_stmt
+    | method_ivk_stmt
     ;
 
 
-var_decl_stmt: mut_mod comma_var_ids COLON typ (EQ_OP comma_exps)? SEMI;
-comma_var_ids: VAR_ID (COMMA VAR)*;
+var_decl_stmt: mut_mod comma_ids COLON typ (EQ_OP comma_exps)? SEMI;
 
 assign_stmt: lhs EQ_OP exp SEMI;
 
 if_stmt: IF if_cond stmt_block (ELIF if_cond stmt_block)* (ELSE stmt_block)?;
 if_cond: LP exp RP;
 
-// VAR_ID should be a scalar variable (which couble be a MEMBER_ID)
-for_stmt: FOREACH LP VAR_ID IN exp DOTDOT exp (BY exp)? RP stmt_block;
+for_stmt: FOREACH LP ID IN exp DOTDOT exp (BY exp)? RP stmt_block;
 
 break_stmt: BREAK SEMI;
 continue_stmt: CONTINUE SEMI;
 return_stmt: RETURN exp? SEMI;
 
-method_invoke_stmt: VAR_ID LP comma_exps RP;
+method_ivk_stmt: method_ivk SEMI;
+method_ivk: ID LP comma_exps RP;
 
-exp returns [value]
+// TODO: fix this
+lhs: exp;
+
+
+exp: exp0;
+// string
+exp0
+    : exp1 (ADD_DOT_OP | EQEQ_DOT_OP) exp1
+    | exp1
+    ;
+// relational
+exp1
+    : exp2 (EQ_OP | NOT_EQ_OP | LT_OP | GT_OP | LE_OP | GE_OP) exp2
+    | exp2
+    ;
+// logical
+exp2
+    : exp2 (AND_OP | OR_OP) exp3
+    | exp3
+    ;
+// adding
+exp3
+    : exp3 (ADD_OP | SUB_OP) exp4
+    | exp4
+    ;
+// multiplying
+exp4
+    : exp4 (MUL_OP | DIV_OP | MOD_OP) exp5
+    | exp5
+    ;
+// logical not
+exp5
+    : NOT_OP exp6
+    | exp6
+    ;
+// sign
+exp6
+    : SUB_OP exp7
+    | exp7
+    ;
+// index
+exp7
+    : exp8 LK exp RK
+    | exp8
+    ;
+// instance access
+exp8
+    : exp8 DOT_OP (ID | method_ivk)
+    | exp9
+    ;
+// static access
+exp9
+    : exp9 COLON_COLON_OP (ID | method_ivk)
+    | exp10
+    ;
+// object creation
+exp10: NEW_OP method_ivk | exp11;
+exp11
     : array
-    | BOOL_LIT
-    | NULL
     | INT_LIT
     | FLOAT_LIT
+    | BOOL_LIT
     | STR_LIT
-    | MEMBER_ID
+    | NULL
+    | SELF
+    | ID
+    | LP exp RP
     ;
 
-// TODO: test this
-comma_exps: (exp (COMMA exp)*)?;
 
 array: ARR LP comma_exps RP;
-lhs: ;
+
+comma_exps: (exp (COMMA exp)*)?;
+
+
+
+
+
 
 
 
@@ -151,6 +220,8 @@ CONSTRUCTOR: 'Constructor';
 DESTRUCTOR: 'Destructor';
 BY: 'By';
 
+SELF: 'Self';
+
 ARR: 'Array';
 INT: 'Int';
 FLOAT: 'Float';
@@ -202,8 +273,7 @@ UNCLOSE_STRING: '"' (ESC_SEQ | NOT_ESC_SEQ)*;
 
 
 // STATIC_MODIFIER: '$'; can attribute identifier = method identifier?
-MEMBER_ID: '$'? [a-zA-Z_] ([a-zA-Z_] | [0-9])*;
-VAR_ID: [a-zA-Z_] ([a-zA-Z_] | [0-9])*;
+ID: '$'? [a-zA-Z_] ([a-zA-Z_] | [0-9])*;
 
 
 // 3.1 '\n' is used as newline character by compiler.
