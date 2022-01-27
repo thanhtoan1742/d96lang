@@ -2,6 +2,8 @@ __pycache__/
 .vscode/
 *.class
 
+.DS_Store
+
 /submission/
 
 /docs/statements/
