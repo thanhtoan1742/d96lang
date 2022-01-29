@@ -439,6 +439,105 @@ Class Program {
         expect = "successful"
         self._test(testcase, expect)
 
+
+    # array declaration
+    def test_array_decl_0(self):
+        testcase = \
+"""
+Class Program {
+    Var a: Array[Int, 2];
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_array_decl_1(self):
+        testcase = \
+"""
+Class Program {
+    Var a: Array[Array[Int, 3], 2];
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_array_decl_2(self):
+        testcase = \
+"""
+Class Program {
+    Var a: Array[Program, 2];
+}
+"""
+        expect = "Error on line 3 col 17: Program"
+        self._test(testcase, expect)
+
+    def test_array_decl_3(self):
+        testcase = \
+"""
+Class Program {
+    Var a: Array(Int, 2);
+}
+"""
+        expect = "Error on line 3 col 16: ("
+        self._test(testcase, expect)
+
+    def test_array_decl_4(self):
+        testcase = \
+"""
+Class Program {
+    Var a: Array[Int];
+}
+"""
+        expect = "Error on line 3 col 20: ]"
+        self._test(testcase, expect)
+
+    def test_array_decl_5(self):
+        testcase = \
+"""
+Class Program {
+    Var a: Array[Int, 1.2];
+}
+"""
+        expect = "Error on line 3 col 22: 1.2"
+        self._test(testcase, expect)
+
+    def test_array_decl_6(self):
+        testcase = \
+"""
+Class Program {
+    Var a: Array[Int 1];
+}
+"""
+        expect = "Error on line 3 col 21: 1"
+        self._test(testcase, expect)
+
+
+
+
+    # array expression
+    def test_array_exp_0(self):
+        testcase = \
+"""
+Class Program {
+    Var a: Array[Int, 2] = Array(1, 2);
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_array_exp_1(self):
+        testcase = \
+"""
+Class Program {
+    Var a: Array[Array[Int, 2], 2] = Array(Array(1, 2), Array(3, 4));
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+
+
+
     def test_var_decl_1(self):
         testcase = \
 """
@@ -486,6 +585,7 @@ Class Program {
 """
         expect = """successful"""
         self._test(testcase, expect)
+
 
 
 
