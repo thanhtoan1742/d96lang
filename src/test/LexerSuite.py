@@ -572,7 +572,45 @@ line
         expect = """2.2,<EOF>"""
         self._test(testcase, expect)
 
-    # TODO: test 01.01, 1._01, 1.1_, 1e_1, 1e1_, 1.0000, 1.1000, 000.001
+    def test_float_lit_7(self):
+        testcase = """01.01"""
+        expect = """01,.,01,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_float_lit_8(self):
+        testcase = """1._01"""
+        expect = """1,.,_01,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_float_lit_9(self):
+        testcase = """1.1_"""
+        expect = """1.1,_,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_float_lit_10(self):
+        testcase = """1e_1"""
+        expect = """1,e_1,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_float_lit_11(self):
+        testcase = """1e1_"""
+        expect = """1e1,_,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_float_lit_12(self):
+        testcase = """1.0000"""
+        expect = """1.0,00,0,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_float_lit_13(self):
+        testcase = """1.10000"""
+        expect = """1.10000,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_float_lit_14(self):
+        testcase = """000.001"""
+        expect = """00,0.001,<EOF>"""
+        self._test(testcase, expect)
 
 
 
@@ -610,7 +648,6 @@ line
         testcase = """ "My string \\"""
         expect = "Illegal Escape In String: My string \\"
         self._test(testcase, expect)
-    # TODO: add ILLEGAL_ESCAPE and UNCLOSE_STRING test
 
 
     # id and static id
