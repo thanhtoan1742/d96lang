@@ -135,8 +135,6 @@ Class Program {
 """
 Class Program {
     Val a, b: Int = 1;
-    main() {
-    }
 }
 """
         expect = "successful"
@@ -147,8 +145,6 @@ Class Program {
 """
 Class Program {
     Val a, b: Int = 1, 2, 3;
-    main() {
-    }
 }
 """
         expect = """Error on line 3 col 24: ,"""
@@ -158,21 +154,17 @@ Class Program {
         testcase = \
 """
 Class Program {
-Val a, b: Int =;
-    main() {
-    }
+    Val a, b: Int =;
 }
 """
-        expect = """Error on line 3 col 15: ;"""
+        expect = """Error on line 3 col 19: ;"""
         self._test(testcase, expect)
 
     def test_att_decl_4(self):
         testcase = \
 """
 Class Program {
-Val a, b: Int = 1 + 2;
-    main() {
-    }
+    Val a, b: Int = 1 + 2;
 }
 """
         expect = "successful"
@@ -182,9 +174,7 @@ Val a, b: Int = 1 + 2;
         testcase = \
 """
 Class Program {
-Val $a, $b: Int = 1 + 2;
-    main() {
-    }
+    Val $a, $b: Int = 1 + 2;
 }
 """
         expect = "successful"
@@ -194,12 +184,70 @@ Val $a, $b: Int = 1 + 2;
         testcase = \
 """
 Class Program {
-Val $a, b: Int = 1 + 2;
-    main() {
-    }
+    Val $a, b: Int = 1 + 2;
 }
 """
         expect = "successful"
+        self._test(testcase, expect)
+
+    def test_att_decl_7(self):
+        testcase = \
+"""
+Class Program {
+    NotValOrVar att: Int;
+}
+"""
+        expect = "Error on line 3 col 16: att"
+        self._test(testcase, expect)
+
+    def test_att_decl_8(self):
+        testcase = \
+"""
+Class Program {
+    Var 123: Int;
+}
+"""
+        expect = "Error on line 3 col 8: 123"
+        self._test(testcase, expect)
+
+    def test_att_decl_9(self):
+        testcase = \
+"""
+Class Program {
+    att: Int;
+}
+"""
+        expect = "Error on line 3 col 7: :"
+        self._test(testcase, expect)
+
+    def test_att_decl_10(self):
+        testcase = \
+"""
+Class Program {
+    Var att;
+}
+"""
+        expect = "Error on line 3 col 11: ;"
+        self._test(testcase, expect)
+
+    def test_att_decl_11(self):
+        testcase = \
+"""
+Class Program {
+    Var att: Int 123;
+}
+"""
+        expect = "Error on line 3 col 17: 123"
+        self._test(testcase, expect)
+
+    def test_att_decl_12(self):
+        testcase = \
+"""
+Class Program {
+    Var att: Int = 123
+}
+"""
+        expect = "Error on line 4 col 0: }"
         self._test(testcase, expect)
 
 
@@ -265,6 +313,9 @@ Class Program {
 """
         expect = """successful"""
         self._test(testcase, expect)
+
+
+
 
     # test variable declaration statement
     def test_var_decl_stmt_0(self):
