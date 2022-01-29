@@ -252,6 +252,179 @@ Class Program {
 
 
 
+    # method declaration
+    def test_method_decl_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {}
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_method_decl_1(self):
+        testcase = \
+"""
+Class Program {
+    $main() {}
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_method_decl_2(self):
+        testcase = \
+"""
+Class Program {
+    method(a: Int) {}
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_method_decl_3(self):
+        testcase = \
+"""
+Class Program {
+    method(a, b: Int) {}
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_method_decl_4(self):
+        testcase = \
+"""
+Class Program {
+    method(a, b: Int; c: String; d, e: Boolean) {}
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_method_decl_5(self):
+        testcase = \
+"""
+Class Program {
+    method(a, b: Int; c: String; d, e: Boolean)
+}
+"""
+        expect = "Error on line 4 col 0: }"
+        self._test(testcase, expect)
+
+    def test_method_decl_6(self):
+        testcase = \
+"""
+Class Program {
+    method {}
+}
+"""
+        expect = "Error on line 3 col 11: {"
+        self._test(testcase, expect)
+
+    def test_method_decl_7(self):
+        testcase = \
+"""
+Class Program {
+    0123() {}
+}
+"""
+        expect = "Error on line 3 col 4: 0123"
+        self._test(testcase, expect)
+
+    def test_method_decl_8(self):
+        testcase = \
+"""
+Class Program {
+    method(a) {}
+}
+"""
+        expect = "Error on line 3 col 12: )"
+        self._test(testcase, expect)
+
+    def test_method_decl_10(self):
+        testcase = \
+"""
+Class Program {
+    method(a: Int, b: String) {}
+}
+"""
+        expect = "Error on line 3 col 17: ,"
+        self._test(testcase, expect)
+
+    def test_method_decl_11(self):
+        testcase = \
+"""
+Class Program {
+    method(a,: Int) {}
+}
+"""
+        expect = "Error on line 3 col 13: :"
+        self._test(testcase, expect)
+
+    def test_method_decl_12(self):
+        testcase = \
+"""
+Class Program {
+    method(a: Int;) {}
+}
+"""
+        expect = "Error on line 3 col 18: )"
+        self._test(testcase, expect)
+
+    def test_method_decl_13(self):
+        testcase = \
+"""
+Class Program {
+    method($a: Int) {}
+}
+"""
+        expect = "Error on line 3 col 11: $a"
+        self._test(testcase, expect)
+
+    def test_method_decl_14(self):
+        testcase = \
+"""
+Class Program {
+    Constructor(a: Int) {}
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_method_decl_15(self):
+        testcase = \
+"""
+Class Program {
+    Destructor() {}
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_method_decl_16(self):
+        testcase = \
+"""
+Class Program {
+    Constructor() {}
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_method_decl_17(self):
+        testcase = \
+"""
+Class Program {
+    Destructor(a: Int) {}
+}
+"""
+        expect = "Error on line 3 col 15: a"
+        self._test(testcase, expect)
+
+
+
 
     # var/val declaration
     def test_var_decl_0(self):
