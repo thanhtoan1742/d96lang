@@ -53,102 +53,68 @@ Class Rectangle: Shape {
 
 
     # my test
-    # class test
-    def test_class_0(self):
+    # class declaration test
+    def test_class_decl_0(self):
         testcase = \
 """
 Class Program {
-    Val attr1: Int = 0;
-    Var $attr2: String = "asdasd";
-    main() {
-    }
 }
 """
         expect = "successful"
 
-    def test_class_1(self):
+    def test_class_decl_1(self):
         testcase = \
 """
-Class Program {
-    Val attr1: Int = 0;
-    Var $attr2: String = "asdasd";
-    Val $attr3, at5: Float;
-
-    $laugh(a, b: String; c: Int) {
-    }
-
-    add() {
-    }
-
-    main() {
-    }
+Class Derived:Super {
 }
 """
         expect = "successful"
         self._test(testcase, expect)
 
-
-
-    # var/val declaration
-    def test_var_decl_0(self):
+    def test_class_decl_2(self):
         testcase = \
 """
-Class Program {
-    main() {
-        Val a, b: Int = 1, 2;
-    }
+Class $Program {
 }
 """
-        expect = "successful"
+        expect = "Error on line 2 col 6: $Program"
         self._test(testcase, expect)
 
-    def test_var_decl_1(self):
+    def test_class_decl_3(self):
         testcase = \
 """
-Class Program {
-    main() {
-        Val a, b: Int = 1;
-    }
+Class Derived:$Super {
 }
 """
-        expect = "successful"
+        expect = "Error on line 2 col 14: $Super"
         self._test(testcase, expect)
 
-    def test_var_decl_2(self):
+    def test_class_decl_4(self):
         testcase = \
 """
-Class Program {
-    main() {
-        Val a, b: Int = 1, 2, 3;
-    }
-}
+Class Program
 """
-        expect = """Error on line 4 col 28: ,"""
+        expect = "Error on line 3 col 0: <EOF>"
         self._test(testcase, expect)
 
-    def test_var_decl_3(self):
+    def test_class_decl_5(self):
         testcase = \
 """
-Class Program {
-    main() {
-        Val a, b: Int =;
-    }
+Class Derived: {
 }
 """
-        expect = """Error on line 4 col 23: ;"""
+        expect = "Error on line 2 col 15: {"
         self._test(testcase, expect)
 
-    def test_var_decl_4(self):
+    def test_class_decl_6(self):
         testcase = \
 """
-Class Program {
-    main() {
-        Val a, b: Int = 1 + 2;
-    }
+Class {
 }
 """
-        expect = """successful"""
+        expect = "Error on line 2 col 6: {"
         self._test(testcase, expect)
+
 
 
     # atrributes declaration
@@ -238,6 +204,67 @@ Val $a, b: Int = 1 + 2;
 
 
 
+
+    # var/val declaration
+    def test_var_decl_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a, b: Int = 1, 2;
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_var_decl_1(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a, b: Int = 1;
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_var_decl_2(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a, b: Int = 1, 2, 3;
+    }
+}
+"""
+        expect = """Error on line 4 col 28: ,"""
+        self._test(testcase, expect)
+
+    def test_var_decl_3(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a, b: Int =;
+    }
+}
+"""
+        expect = """Error on line 4 col 23: ;"""
+        self._test(testcase, expect)
+
+    def test_var_decl_4(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a, b: Int = 1 + 2;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
 
     # test variable declaration statement
     def test_var_decl_stmt_0(self):
