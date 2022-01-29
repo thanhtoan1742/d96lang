@@ -55,8 +55,16 @@ comma_ids: ID (COMMA ID)*;
 
 
 
-// not finished
-typ: INT | FLOAT | STR | BOOL;
+typ
+    :
+    | arr_typ
+    | ID
+    | INT
+    | FLOAT
+    | STR
+    | BOOL
+    ;
+arr_typ: ARR LK typ COMMA INT_LIT RK;
 
 
 
@@ -148,7 +156,7 @@ exp9
 // object creation
 exp10: NEW_OP method_ivk | exp11;
 exp11
-    : array
+    : arr
     | INT_LIT
     | FLOAT_LIT
     | BOOL_LIT
@@ -160,7 +168,7 @@ exp11
     ;
 
 
-array: ARR LP comma_exps RP;
+arr: ARR LP comma_exps RP;
 
 comma_exps: (exp (COMMA exp)*)?;
 
@@ -266,7 +274,7 @@ FLOAT_LIT
 
 fragment NOT_ESC_SEQ: ~[\b\f\n\r\t'\\"];
 fragment ESC_SEQ: '\\' [bfnrt'\\] | '\'"';
-fragment ILLEGAL_ESC_SEQ: '\\' ~[bfnrt'\\] | '\'' ~["];
+fragment ILLEGAL_ESC_SEQ: '\\' ~[bfnrt'\\] | '\'' ~["] | '\\';
 STR_LIT: '"' (ESC_SEQ | NOT_ESC_SEQ)* '"';
 ILLEGAL_ESCAPE: '"' (ESC_SEQ | NOT_ESC_SEQ)* ILLEGAL_ESC_SEQ;
 UNCLOSE_STRING: '"' (ESC_SEQ | NOT_ESC_SEQ)*;
