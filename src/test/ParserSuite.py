@@ -835,6 +835,196 @@ Class Program {
 
 
 
+    # index operator expression
+    def test_idx_exp_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Int = arr[1];
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_idx_exp_1(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Int = arr[1][2][3];
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_idx_exp_2(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Int = arr[];
+    }
+}
+"""
+        expect = """Error on line 4 col 24: ["""
+        self._test(testcase, expect)
+
+
+    # instance access operator expression
+    def test_dot_op_exp_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: String = System.filename;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_dot_op_exp_1(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: String = Stdin.read();
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_dot_op_exp_2(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: String = System.File.Path.filename;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_dot_op_exp_3(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: File = System.File.Path.open("input.txt");
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_dot_op_exp_4(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: String = System.File.Path..filename;
+    }
+}
+"""
+        expect = """Error on line 4 col 40: .."""
+        self._test(testcase, expect)
+
+    def test_dot_op_exp_5(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: String = System.$filename;
+    }
+}
+"""
+        expect = """Error on line 4 col 30: ."""
+        self._test(testcase, expect)
+
+
+
+
+    # static access operator expression
+    def test_coloncolon_op_exp_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Float = Math::$PI;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_coloncolon_op_exp_1(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Float = Math::$exp(10);
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_coloncolon_op_exp_2(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Float = Math::exp(10);
+    }
+}
+"""
+        expect = """Error on line 4 col 29: exp"""
+        self._test(testcase, expect)
+
+    def test_coloncolon_op_exp_3(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Float = Math::Functions::$exp(10);
+    }
+}
+"""
+        expect = """Error on line 4 col 29: Functions"""
+        self._test(testcase, expect)
+
+
+    # new operator expression
+    def test_new_op_exp_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Shade = New Shade();
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_new_op_exp_1(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Shade = New Square(10);
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+
 
     # test variable declaration statement
     def test_var_decl_stmt_0(self):
