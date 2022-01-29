@@ -439,6 +439,56 @@ Class Program {
         expect = "successful"
         self._test(testcase, expect)
 
+    def test_var_decl_1(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a, b: Int = 1;
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_var_decl_2(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a, b: Int = 1, 2, 3;
+    }
+}
+"""
+        expect = """Error on line 4 col 28: ,"""
+        self._test(testcase, expect)
+
+    def test_var_decl_3(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a, b: Int =;
+    }
+}
+"""
+        expect = """Error on line 4 col 23: ;"""
+        self._test(testcase, expect)
+
+    def test_var_decl_4(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a, b: Int = 1 + 2;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+
+
 
     # array declaration
     def test_array_decl_0(self):
@@ -558,54 +608,230 @@ Class Program {
 
 
 
-    def test_var_decl_1(self):
+    # arithmetic expression
+    def test_arith_exp_0(self):
         testcase = \
 """
 Class Program {
     main() {
-        Val a, b: Int = 1;
-    }
-}
-"""
-        expect = "successful"
-        self._test(testcase, expect)
-
-    def test_var_decl_2(self):
-        testcase = \
-"""
-Class Program {
-    main() {
-        Val a, b: Int = 1, 2, 3;
-    }
-}
-"""
-        expect = """Error on line 4 col 28: ,"""
-        self._test(testcase, expect)
-
-    def test_var_decl_3(self):
-        testcase = \
-"""
-Class Program {
-    main() {
-        Val a, b: Int =;
-    }
-}
-"""
-        expect = """Error on line 4 col 23: ;"""
-        self._test(testcase, expect)
-
-    def test_var_decl_4(self):
-        testcase = \
-"""
-Class Program {
-    main() {
-        Val a, b: Int = 1 + 2;
+        Val a: Int = 1 + 2;
     }
 }
 """
         expect = """successful"""
         self._test(testcase, expect)
 
+    def test_arith_exp_1(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Int = 1 - 2;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_arith_exp_2(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Int = 1 * 2;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_arith_exp_3(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Int = 1 / 2;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_arith_exp_4(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Int = 1 % 2;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+
+    def test_arith_exp_5(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Int = -1;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+
+    # boolean expression
+    def test_bool_exp_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Bool = !boolVar;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_bool_exp_1(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Bool = bool0 && bool1;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_bool_exp_2(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Bool = bool0 || bool1;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_bool_exp_3(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Bool = "a" ==. "b";
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_bool_exp_4(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Bool = !b;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+
+    # string expression
+    def test_str_exp_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: String = "a" +. "b";
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+
+
+    # relational operation
+    def test_rel_exp_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Bool = a == b;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_rel_exp_1(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Bool = a != b;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_rel_exp_2(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Bool = a < b;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_rel_exp_3(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Bool = a > b;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_rel_exp_4(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Bool = a <= b;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+    def test_rel_exp_5(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Bool = a >= b;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
 
 
 
@@ -623,7 +849,6 @@ Class Program {
         expect = "successful"
         self._test(testcase, expect)
 
-    # test variable declaration statement
     def test_var_decl_stmt_1(self):
         testcase = \
 """

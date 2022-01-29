@@ -122,7 +122,7 @@ exp0
     ;
 // relational
 exp1
-    : exp2 (EQ_OP | NOT_EQ_OP | LT_OP | GT_OP | LE_OP | GE_OP) exp2
+    : exp2 (EQEQ_OP | NOT_EQ_OP | LT_OP | GT_OP | LE_OP | GE_OP) exp2
     | exp2
     ;
 // logical
