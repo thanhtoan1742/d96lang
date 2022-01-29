@@ -67,7 +67,11 @@ var_decl_stmt: var_decl SEMI;
 
 assign_stmt: lhs EQ_OP exp SEMI;
 lhs : scalar_var | idx_exp ;
-scalar_var: mix_id;
+scalar_var
+    : ID
+    | exp DOT_OP ID
+    | ID COLON_COLON_OP STATIC_ID
+    ;
 // NOTE: this may cause bug
 idx_exp: exp (LK exp RK)+;
 

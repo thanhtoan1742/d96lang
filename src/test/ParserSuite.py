@@ -1026,6 +1026,21 @@ Class Program {
 
 
 
+
+    # self
+    def test_self_exp_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a: Float = Self.length;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
+
     # test variable declaration statement
     def test_var_decl_stmt_0(self):
         testcase = \
@@ -1050,4 +1065,174 @@ Class Program {
 """
         expect = "Error on line 4 col 12: $a"
         self._test(testcase, expect)
+
+
+    # assigment statement
+    def test_assign_stmt_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        a = 10;
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+
+    def test_assign_stmt_1(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        a.b = 10;
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_assign_stmt_2(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        a::$b = 10;
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_assign_stmt_3(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        arr[1] = 10;
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+
+
+    # if statement
+    def test_if_stmt_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        If (a > 0) {
+        }
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_if_stmt_1(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        If (a > 0) {
+        }
+        Else {
+        }
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_if_stmt_2(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        If (a > 0) {
+        }
+        Elseif (a > -10) {
+        }
+        Else {
+        }
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_if_stmt_3(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        If (a > 0) {
+        }
+        Elseif (a > -10) {
+        }
+        Elseif (a > -20) {
+        }
+        Elseif (a > -30) {
+        }
+        Else {
+        }
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_if_stmt_4(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        If () {
+        }
+    }
+}
+"""
+        expect = "Error on line 4 col 12: )"
+        self._test(testcase, expect)
+
+    def test_if_stmt_5(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        If (a > 0) {
+        }
+        Elseif () {
+        }
+        Else {
+        }
+    }
+}
+"""
+        expect = "Error on line 6 col 16: )"
+        self._test(testcase, expect)
+
+    def test_if_stmt_6(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        If (a > 0) {
+        }
+        Else (a > 10) {
+        }
+    }
+}
+"""
+        expect = "Error on line 6 col 13: ("
+        self._test(testcase, expect)
+
+
+
+
+
 
