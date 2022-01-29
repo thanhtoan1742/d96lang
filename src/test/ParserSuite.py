@@ -535,6 +535,26 @@ Class Program {
         expect = "successful"
         self._test(testcase, expect)
 
+    def test_array_exp_2(self):
+        testcase = \
+"""
+Class Program {
+    Var a: Array[Int, 2] = Array(1 2);
+}
+"""
+        expect = "Error on line 3 col 35: 2"
+        self._test(testcase, expect)
+
+    def test_array_exp_2(self):
+        testcase = \
+"""
+Class Program {
+    Var a: Array[Int, 2] = Array[1, 2];
+}
+"""
+        expect = "Error on line 3 col 32: ["
+        self._test(testcase, expect)
+
 
 
 
