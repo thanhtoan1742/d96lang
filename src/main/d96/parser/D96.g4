@@ -296,7 +296,6 @@ ILLEGAL_ESCAPE: '"' (ESC_SEQ | NOT_ESC_SEQ)* ILLEGAL_ESC_SEQ;
 UNCLOSE_STRING: '"' (ESC_SEQ | NOT_ESC_SEQ)*;
 
 
-// STATIC_MODIFIER: '$'; can attribute identifier = method identifier?
 STATIC_ID: '$' ID;
 ID: [a-zA-Z_] ([a-zA-Z_] | [0-9])*;
 

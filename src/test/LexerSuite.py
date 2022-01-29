@@ -398,58 +398,141 @@ line
         expect = """1234567890,<EOF>"""
         self._test(testcase, expect)
 
-    # TODO: test 123a, 19a2, _123, 123_
+    def test_int_lit_3(self):
+        testcase = """123a"""
+        expect = """123,a,<EOF>"""
+        self._test(testcase, expect)
 
     def test_int_lit_4(self):
+        testcase = """19a2"""
+        expect = """19,a2,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_5(self):
+        testcase = """_123"""
+        expect = """_123,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_6(self):
+        testcase = """123_"""
+        expect = """123,_,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_7(self):
         testcase = """0x0"""
         expect = """0x0,<EOF>"""
         self._test(testcase, expect)
 
-    def test_int_lit_5(self):
+    def test_int_lit_8(self):
         testcase = """0X1234567890ABCDEF"""
         expect = """0X1234567890ABCDEF,<EOF>"""
         self._test(testcase, expect)
 
-    def test_int_lit_6(self):
+    def test_int_lit_9(self):
         testcase = """0X123_456_789_0_A_B_CDE_F"""
         expect = """0X1234567890ABCDEF,<EOF>"""
         self._test(testcase, expect)
 
-    # TODO: test 0x00, 0xA_AG, 0x_A1, 0_x112, 0x11_
+    def test_int_lit_10(self):
+        testcase = """0x00"""
+        expect = """0x0,0,<EOF>"""
+        self._test(testcase, expect)
 
-    def test_int_lit_7(self):
+    def test_int_lit_11(self):
+        testcase = """0xA_AG"""
+        expect = """0xAA,G,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_12(self):
+        testcase = """0x_A1"""
+        expect = """0,x_A1,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_13(self):
+        testcase = """0_x112"""
+        expect = """0,_x112,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_14(self):
+        testcase = """0x11_"""
+        expect = """0x11,_,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_15(self):
         testcase = """00"""
         expect = """00,<EOF>"""
         self._test(testcase, expect)
 
-    def test_int_lit_8(self):
+    def test_int_lit_16(self):
         testcase = """012345670"""
         expect = """012345670,<EOF>"""
         self._test(testcase, expect)
 
-    def test_int_lit_9(self):
+    def test_int_lit_17(self):
         testcase = """012_3_456_70"""
         expect = """012345670,<EOF>"""
         self._test(testcase, expect)
 
-    # TODO: test 000, 07_18, 0_21, 023_
+    def test_int_lit_18(self):
+        testcase = """000"""
+        expect = """00,0,<EOF>"""
+        self._test(testcase, expect)
 
-    def test_int_lit_10(self):
+    def test_int_lit_19(self):
+        testcase = """07_18"""
+        expect = """071,8,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_20(self):
+        testcase = """0_21"""
+        expect = """0,_21,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_21(self):
+        testcase = """023_"""
+        expect = """023,_,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_22(self):
         testcase = """0b0"""
         expect = """0b0,<EOF>"""
         self._test(testcase, expect)
 
-    def test_int_lit_11(self):
+    def test_int_lit_23(self):
         testcase = """0b10"""
         expect = """0b10,<EOF>"""
         self._test(testcase, expect)
 
-    def test_int_lit_12(self):
+    def test_int_lit_24(self):
         testcase = """0b1_0"""
         expect = """0b10,<EOF>"""
         self._test(testcase, expect)
 
-    # TODO: test 0b00, 0b1_02, 0b_11, 0_b11, 0b11_
+    def test_int_lit_25(self):
+        testcase = """0b00"""
+        expect = """0b0,0,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_26(self):
+        testcase = """0b1_02"""
+        expect = """0b10,2,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_27(self):
+        testcase = """0b_11"""
+        expect = """0,b_11,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_28(self):
+        testcase = """0_b11"""
+        expect = """0,_b11,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_int_lit_29(self):
+        testcase = """0b11_"""
+        expect = """0b11,_,<EOF>"""
+        self._test(testcase, expect)
+
 
 
 
@@ -532,13 +615,13 @@ line
 
     # id and static id
     def test_id_0(self):
-        testcase = """abcde__aa_"""
-        expect = """abcde__aa_,<EOF>"""
+        testcase = """Abc2112de__aa_"""
+        expect = """Abc2112de__aa_,<EOF>"""
         self._test(testcase, expect)
 
     def test_id_1(self):
-        testcase = """$abcde__aa_"""
-        expect = """$abcde__aa_,<EOF>"""
+        testcase = """$Abc2112de__aa_"""
+        expect = """$Abc2112de__aa_,<EOF>"""
         self._test(testcase, expect)
 
 
