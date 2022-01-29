@@ -39,36 +39,14 @@ program: class_decl* EOF;
 class_decl: CLASS ID (COLON ID)? LB class_mems RB;
 class_mems: (method_decl | attr_decl)*;
 
-attr_decl: var_decl SEMI;
-mut_mod: VAL | VAR;
+attr_decl: var_decl_mix SEMI;
 
 method_decl: normal_method_decl | constuctor_decl | destuctor_decl;
-normal_method_decl: ID LP semi_param_decls RP stmt_block;
+normal_method_decl: mix_id LP semi_param_decls RP stmt_block;
 constuctor_decl: CONSTRUCTOR LP semi_param_decls RP stmt_block;
 destuctor_decl: DESTRUCTOR LP RP stmt_block;
 semi_param_decls: (param_decl (SEMI param_decl)*)?;
 param_decl: comma_ids COLON typ;
-
-comma_ids: ID (COMMA ID)*;
-
-
-var_decl: mut_mod (var_decl_init_rec | var_decl_no_init);
-var_decl_no_init: comma_ids COLON typ;
-// a, b, c = 1, 2, 3
-// this will match a - 3, b - 2, c - 1 which may cause problem
-// since the right match should be a - 1, b - 2, c - 3
-var_decl_init_rec
-    : comma_ids COLON typ EQ_OP exp
-    | ID COMMA var_decl_init_rec COMMA exp
-    ;
-
-
-
-
-typ : prime_typ | class_typ | arr_typ;
-prime_typ: INT | FLOAT | STR | BOOL;
-class_typ: ID;
-arr_typ: ARR LK (prime_typ | class_typ) COMMA INT_LIT RK;
 
 
 
@@ -85,25 +63,55 @@ stmt
     | method_ivk_stmt
     ;
 
-
 var_decl_stmt: var_decl SEMI;
 
 assign_stmt: lhs EQ_OP exp SEMI;
+lhs : scalar_var | idx_exp ;
+scalar_var: mix_id;
+// NOTE: this may cause bug
+idx_exp: exp (LK exp RK)+;
 
 if_stmt: IF if_cond stmt_block (ELIF if_cond stmt_block)* (ELSE stmt_block)?;
 if_cond: LP exp RP;
 
-for_stmt: FOREACH LP ID IN exp DOTDOT exp (BY exp)? RP stmt_block;
+for_stmt: FOREACH LP scalar_var IN exp DOTDOT exp (BY exp)? RP stmt_block;
 
 break_stmt: BREAK SEMI;
 continue_stmt: CONTINUE SEMI;
 return_stmt: RETURN exp? SEMI;
 
-method_ivk_stmt: method_ivk SEMI;
-method_ivk: ID LP comma_exps RP;
+method_ivk_stmt
+    : exp DOT_OP ID par_exps SEMI
+    | ID COLON_COLON_OP STATIC_ID par_exps SEMI
+    ;
 
-// TODO: fix this
-lhs: exp;
+
+
+
+
+var_decl: mut_mod (var_decl_init | var_decl_no_init);
+var_decl_no_init: comma_ids COLON typ;
+// a, b, c = 1, 2, 3
+// this will match a - 3, b - 2, c - 1 which may cause problem
+// since the right match should be a - 1, b - 2, c - 3
+var_decl_init
+    : comma_ids COLON typ EQ_OP exp
+    | ID COMMA var_decl_init COMMA exp
+    ;
+
+var_decl_mix: mut_mod (var_decl_init_mix | var_decl_no_init_mix);
+var_decl_no_init_mix: comma_mix_ids COLON typ;
+var_decl_init_mix
+    : comma_mix_ids COLON typ EQ_OP exp
+    | mix_id COMMA var_decl_init_mix COMMA exp
+    ;
+
+mut_mod: VAL | VAR;
+comma_ids: ID (COMMA ID)*;
+comma_mix_ids: mix_id (COMMA mix_id)*;
+mix_id: STATIC_ID | ID;
+
+
 
 
 exp: exp0;
@@ -144,21 +152,21 @@ exp6
     ;
 // index
 exp7
-    : exp8 LK exp RK
+    : exp8 (LK exp RK)+
     | exp8
     ;
 // instance access
 exp8
-    : exp8 DOT_OP (ID | method_ivk)
+    : exp8 DOT_OP (ID par_exps?)
     | exp9
     ;
 // static access
 exp9
-    : exp9 COLON_COLON_OP (ID | method_ivk)
+    : ID COLON_COLON_OP (STATIC_ID par_exps?)
     | exp10
     ;
 // object creation
-exp10: NEW_OP method_ivk | exp11;
+exp10: NEW_OP ID par_exps | exp11;
 exp11
     : arr
     | INT_LIT
@@ -167,16 +175,20 @@ exp11
     | STR_LIT
     | NULL
     | SELF
-    | ID
+    | mix_id
     | LP exp RP
     ;
 
-
-arr: ARR LP comma_exps RP;
-
+arr: ARR par_exps;
+par_exps: LP comma_exps RP;
 comma_exps: (exp (COMMA exp)*)?;
 
 
+
+typ : prime_typ | class_typ | arr_typ;
+prime_typ: INT | FLOAT | STR | BOOL;
+class_typ: ID;
+arr_typ: ARR LK (prime_typ | arr_typ) COMMA INT_LIT RK;
 
 
 
@@ -223,7 +235,7 @@ IF: 'If';
 ELIF: 'Elseif';
 ELSE: 'Else';
 FOREACH: 'Foreach';
-IN: 'IN';
+IN: 'In';
 RETURN: 'Return';
 CLASS: 'Class';
 VAL: 'Val';
@@ -285,7 +297,8 @@ UNCLOSE_STRING: '"' (ESC_SEQ | NOT_ESC_SEQ)*;
 
 
 // STATIC_MODIFIER: '$'; can attribute identifier = method identifier?
-ID: '$'? [a-zA-Z_] ([a-zA-Z_] | [0-9])*;
+STATIC_ID: '$' ID;
+ID: [a-zA-Z_] ([a-zA-Z_] | [0-9])*;
 
 
 // 3.1 '\n' is used as newline character by compiler.

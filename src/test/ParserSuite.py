@@ -126,6 +126,30 @@ Class Program {
         expect = """Error on line 4 col 28: ,"""
         self._test(testcase, expect)
 
+    def test_var_decl_3(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a, b: Int =;
+    }
+}
+"""
+        expect = """Error on line 4 col 23: ;"""
+        self._test(testcase, expect)
+
+    def test_var_decl_4(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a, b: Int = 1 + 2;
+    }
+}
+"""
+        expect = """successful"""
+        self._test(testcase, expect)
+
 
     # atrributes declaration
     def test_att_decl_0(self):
@@ -163,3 +187,81 @@ Class Program {
 """
         expect = """Error on line 3 col 24: ,"""
         self._test(testcase, expect)
+
+    def test_att_decl_3(self):
+        testcase = \
+"""
+Class Program {
+Val a, b: Int =;
+    main() {
+    }
+}
+"""
+        expect = """Error on line 3 col 15: ;"""
+        self._test(testcase, expect)
+
+    def test_att_decl_4(self):
+        testcase = \
+"""
+Class Program {
+Val a, b: Int = 1 + 2;
+    main() {
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_att_decl_5(self):
+        testcase = \
+"""
+Class Program {
+Val $a, $b: Int = 1 + 2;
+    main() {
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_att_decl_6(self):
+        testcase = \
+"""
+Class Program {
+Val $a, b: Int = 1 + 2;
+    main() {
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+
+
+
+    # test variable declaration statement
+    def test_var_decl_stmt_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Var a: Boolean = True;
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    # test variable declaration statement
+    def test_var_decl_stmt_1(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Var $a: Boolean = True;
+    }
+}
+"""
+        expect = "Error on line 4 col 12: $a"
+        self._test(testcase, expect)
+

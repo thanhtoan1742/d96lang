@@ -72,12 +72,10 @@ class LexerSuite(unittest.TestCase):
     def test_comment_1(self):
         testcase = \
 """## multiline
-comment ##
-"""
+comment ##"""
         expect = \
 """## multiline
-comment ##,<EOF>
-"""
+comment ##,<EOF>"""
         self._test(testcase, expect)
 
     def test_comment_2(self):
@@ -87,16 +85,14 @@ multi
     multi
        multi
 line
-  comment##
-"""
+  comment##"""
         expect = \
 """## multi
 multi
     multi
        multi
 line
-  comment##,<EOF>
-"""
+  comment##,<EOF>"""
         self._test(testcase, expect)
 
     def test_comment_3(self):
@@ -526,12 +522,23 @@ line
         expect = """this is a quote escape character: '",<EOF>"""
         self._test(testcase, expect)
 
-
-    def test_str_36(self):
+    def test_str_lit_3(self):
         """ Unclose ending with backslash """
         testcase = """ "My string \\"""
-        expect = "Unclosed String: My string \\"
+        expect = "Illegal Escape In String: My string \\"
         self._test(testcase, expect)
     # TODO: add ILLEGAL_ESCAPE and UNCLOSE_STRING test
+
+
+    # id and static id
+    def test_id_0(self):
+        testcase = """abcde__aa_"""
+        expect = """abcde__aa_,<EOF>"""
+        self._test(testcase, expect)
+
+    def test_id_1(self):
+        testcase = """$abcde__aa_"""
+        expect = """$abcde__aa_,<EOF>"""
+        self._test(testcase, expect)
 
 
