@@ -39,7 +39,7 @@ program: class_decl* EOF;
 class_decl: CLASS ID (COLON ID)? LB class_mems RB;
 class_mems: (method_decl | attr_decl)*;
 
-attr_decl: mut_mod comma_ids COLON typ (EQ_OP comma_exps)? SEMI;
+attr_decl: var_decl SEMI;
 mut_mod: VAL | VAR;
 
 method_decl: normal_method_decl | constuctor_decl | destuctor_decl;
@@ -52,19 +52,23 @@ param_decl: comma_ids COLON typ;
 comma_ids: ID (COMMA ID)*;
 
 
-
-
-
-typ
-    :
-    | arr_typ
-    | ID
-    | INT
-    | FLOAT
-    | STR
-    | BOOL
+var_decl: mut_mod (var_decl_init_rec | var_decl_no_init);
+var_decl_no_init: comma_ids COLON typ;
+// a, b, c = 1, 2, 3
+// this will match a - 3, b - 2, c - 1 which may cause problem
+// since the right match should be a - 1, b - 2, c - 3
+var_decl_init_rec
+    : comma_ids COLON typ EQ_OP exp
+    | ID COMMA var_decl_init_rec COMMA exp
     ;
-arr_typ: ARR LK typ COMMA INT_LIT RK;
+
+
+
+
+typ : prime_typ | class_typ | arr_typ;
+prime_typ: INT | FLOAT | STR | BOOL;
+class_typ: ID;
+arr_typ: ARR LK (prime_typ | class_typ) COMMA INT_LIT RK;
 
 
 
@@ -82,7 +86,7 @@ stmt
     ;
 
 
-var_decl_stmt: mut_mod comma_ids COLON typ (EQ_OP comma_exps)? SEMI;
+var_decl_stmt: var_decl SEMI;
 
 assign_stmt: lhs EQ_OP exp SEMI;
 

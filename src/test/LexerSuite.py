@@ -2,25 +2,32 @@ import unittest
 from TestUtils import TestLexer
 
 
-def write_expect(expect, num):
+def write_wrong_answer(expect, num):
     from pathlib import Path
-    Path('./test/expects/').mkdir(parents=True, exist_ok=True)
-    path = './test/expects/' + str(num) + '.txt'
-    open(path, 'w+').write(expect)
+    Path('./test/WAs/').mkdir(parents=True, exist_ok=True)
+    path = './test/WAs/' + str(num) + '.txt'
+    with open(path, 'w+') as f:
+        testcase = open('./test/testcases/' + str(num) + '.txt').read()
+        solution = open('./test/solutions/' + str(num) + '.txt').read()
+        f.write('\n-----------------------------------TESTCASE----------------------------------\n')
+        f.write(testcase)
+        f.write('\n-----------------------------------EXPECT------------------------------------\n')
+        f.write(expect)
+        f.write('\n-----------------------------------GOT---------------------------------------\n')
+        f.write(solution)
 
 class LexerSuite(unittest.TestCase):
     def __init__(self, methodName: str = ...) -> None:
         super().__init__(methodName=methodName)
         LexerSuite.counter = -1
-        LexerSuite.marker = '☒'
 
     def _test(self, testcase, expect):
         LexerSuite.counter += 1
-        write_expect(expect, self.counter)
         try:
             self.assertTrue(TestLexer.test(testcase, expect, LexerSuite.counter))
         except AssertionError:
-            raise AssertionError(f"{LexerSuite.marker} lexer failed at test: {LexerSuite.counter}")
+            write_wrong_answer(expect, self.counter)
+            raise AssertionError(f"lexer failed at test {LexerSuite.counter}")
 
 
     # sample test in BKeL
@@ -59,7 +66,7 @@ class LexerSuite(unittest.TestCase):
     # comment
     def test_comment_0(self):
         testcase = """## 123 ##"""
-        expect = """ 123 ,<EOF>"""
+        expect = """## 123 ##,<EOF>"""
         self._test(testcase, expect)
 
     def test_comment_1(self):
@@ -68,8 +75,9 @@ class LexerSuite(unittest.TestCase):
 comment ##
 """
         expect = \
-""" multiline
-comment ,<EOF>"""
+"""## multiline
+comment ##,<EOF>
+"""
         self._test(testcase, expect)
 
     def test_comment_2(self):
@@ -82,27 +90,28 @@ line
   comment##
 """
         expect = \
-""" multi
+"""## multi
 multi
     multi
        multi
 line
-  comment,<EOF>"""
+  comment##,<EOF>
+"""
         self._test(testcase, expect)
 
     def test_comment_3(self):
         testcase = """## keywords in comment are ignored: Val Var Int Float For If Else ##"""
-        expect = """ keywords in comment are ignored: Val Var Int Float For If Else ,<EOF>"""
+        expect = """## keywords in comment are ignored: Val Var Int Float For If Else ##,<EOF>"""
         self._test(testcase, expect)
 
     def test_comment_4(self):
         testcase = """##2 consecutive comments##  ## the second comment ##"""
-        expect = """2 consecutive comments, the second comment ,<EOF>"""
+        expect = """##2 consecutive comments##,## the second comment ##,<EOF>"""
         self._test(testcase, expect)
 
     def test_comment_5(self):
         testcase = """## 2 consecutive comments with some thing in between ## Val Var ## the second comment ##"""
-        expect = """ 2 consecutive comments with some thing in between ,Val,Var, the second comment ,<EOF>"""
+        expect = """## 2 consecutive comments with some thing in between ##,Val,Var,## the second comment ##,<EOF>"""
         self._test(testcase, expect)
 
 
@@ -517,6 +526,12 @@ line
         expect = """this is a quote escape character: '",<EOF>"""
         self._test(testcase, expect)
 
+
+    def test_str_36(self):
+        """ Unclose ending with backslash """
+        testcase = """ "My string \\"""
+        expect = "Unclosed String: My string \\"
+        self._test(testcase, expect)
     # TODO: add ILLEGAL_ESCAPE and UNCLOSE_STRING test
 
 

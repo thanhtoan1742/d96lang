@@ -1,24 +1,23 @@
 import unittest
 from TestUtils import TestParser
-from LexerSuite import write_expect
+from LexerSuite import write_wrong_answer
 
 class ParserSuite(unittest.TestCase):
     def __init__(self, methodName: str = ...) -> None:
         super().__init__(methodName=methodName)
         ParserSuite.counter = 999
-        ParserSuite.marker = '☒'
 
     def _test(self, testcase, expect):
         ParserSuite.counter += 1
-        write_expect(expect, self.counter)
         try:
             self.assertTrue(TestParser.test(testcase, expect, ParserSuite.counter))
         except AssertionError:
-            raise AssertionError(f"{ParserSuite.marker} parser failed at test: {ParserSuite.counter}")
+            write_wrong_answer(expect, self.counter)
+            raise AssertionError(f"parser failed at test {ParserSuite.counter}")
 
 
     # sample test from BKeL
-    def test_sample_1000(self):
+    def test_sample_0(self):
         testcase = \
 """
 Class main{}
@@ -27,7 +26,7 @@ Class main{}
         self._test(testcase, expect)
 
 
-    def test_sample_1001(self):
+    def test_sample_1(self):
         testcase = \
 """
 Class Rectangle: Shape {
@@ -40,7 +39,7 @@ Class Rectangle: Shape {
         self._test(testcase, expect)
 
 
-    def test_sample_1002(self):
+    def test_sample_2(self):
         testcase = \
 """
     Class Shape {
@@ -54,7 +53,8 @@ Class Rectangle: Shape {
 
 
     # my test
-    def test_class_1003(self):
+    # class test
+    def test_class_0(self):
         testcase = \
 """
 Class Program {
@@ -66,7 +66,7 @@ Class Program {
 """
         expect = "successful"
 
-    def test_class_1004(self):
+    def test_class_1(self):
         testcase = \
 """
 Class Program {
@@ -85,4 +85,81 @@ Class Program {
 }
 """
         expect = "successful"
+        self._test(testcase, expect)
+
+
+
+    # var/val declaration
+    def test_var_decl_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a, b: Int = 1, 2;
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_var_decl_1(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a, b: Int = 1;
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_var_decl_2(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Val a, b: Int = 1, 2, 3;
+    }
+}
+"""
+        expect = """Error on line 4 col 28: ,"""
+        self._test(testcase, expect)
+
+
+    # atrributes declaration
+    def test_att_decl_0(self):
+        testcase = \
+"""
+Class Program {
+    Val a, b: Int = 1, 2;
+    main() {
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_att_decl_1(self):
+        testcase = \
+"""
+Class Program {
+    Val a, b: Int = 1;
+    main() {
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_att_decl_2(self):
+        testcase = \
+"""
+Class Program {
+    Val a, b: Int = 1, 2, 3;
+    main() {
+    }
+}
+"""
+        expect = """Error on line 3 col 24: ,"""
         self._test(testcase, expect)
