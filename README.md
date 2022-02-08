@@ -2,7 +2,7 @@
 A programming language created follows a PPL course.
 
 ## Setup development environment
-Set environment variable ANTLR_JAR to the file antlr-4.9.2-complete.jar in your computer.  
+Set environment variable ANTLR\_JAR to the file antlr-4.9.2-complete.jar in your computer.  
 Place `jasmin.jar` in `src/external/`.  
 Compile `src/lib/io.java` into `src/lib/io.class`.  
 Install antlr4 python runtime with `pip install antlr4-python3-runtime`.  

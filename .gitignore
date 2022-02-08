@@ -8,9 +8,6 @@ __pycache__/
 
 /docs/statements/
 
-/src/main/d96/utils/
-/src/main/d96/astgen/
-/src/main/d96/checker/
 /src/main/d96/parser/.antlr/
 /src/test/solutions/
 /src/test/testcases/
