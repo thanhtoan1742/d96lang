@@ -1233,6 +1233,91 @@ Class Program {
 
 
 
+    # for statement
+    def test_for_stmt_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Foreach (i In 1 .. 100) {
+        }
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_for_stmt_1(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Foreach (i In 1 .. 100 By 2) {
+        }
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_for_stmt_2(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Foreach (i In 1 .. 100 By 2) {
+            Break;
+        }
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_for_stmt_3(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Foreach (i In 1 .. 100 By 2) {
+            Continue;
+        }
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+
+    # return statement
+    def test_return_stmt_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Return;
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+    def test_return_stmt_0(self):
+        testcase = \
+"""
+Class Program {
+    main() {
+        Return 1;
+    }
+}
+"""
+        expect = "successful"
+        self._test(testcase, expect)
+
+
+
+    # method invocation statement
+
 
 
 
