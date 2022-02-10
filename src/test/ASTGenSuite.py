@@ -16,7 +16,7 @@ class ASTGenSuite(unittest.TestCase):
         }"""
         expect = str(Program([FuncDecl(Id("main"),[],IntType(),Block([],[CallExpr(Id("putIntLn"),[IntLiteral(4)])]))]))
         self.assertTrue(TestAST.test(input,expect,301))
-    
+
     def test_call_without_parameter(self):
         """More complex program"""
         input = """int main () {
@@ -24,4 +24,3 @@ class ASTGenSuite(unittest.TestCase):
         }"""
         expect = str(Program([FuncDecl(Id("main"),[],IntType(),Block([],[CallExpr(Id("getIntLn"),[])]))]))
         self.assertTrue(TestAST.test(input,expect,302))
-   

@@ -73,7 +73,7 @@ scalar_var
     | ID COLON_COLON_OP STATIC_ID
     ;
 // NOTE: this may cause bug
-idx_exp: exp (LK exp RK)+;
+idx_exp: exp8 (LK exp RK)+;
 
 if_stmt: IF if_cond stmt_block (ELIF if_cond stmt_block)* (ELSE stmt_block)?;
 if_cond: LP exp RP;
