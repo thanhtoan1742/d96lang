@@ -1,26 +1,51 @@
 import unittest
 from TestUtils import TestAST
-from AST import *
+from LexerSuite import write_wrong_answer
+import AST
 
 class ASTGenSuite(unittest.TestCase):
-    def test_simple_program(self):
-        """Simple program: int main() {} """
-        input = """int main() {}"""
-        expect = str(Program([FuncDecl(Id("main"),[],IntType(),Block([],[]))]))
-        self.assertTrue(TestAST.test(input,expect,300))
+    def __init__(self, methodName: str = ...) -> None:
+        super().__init__(methodName=methodName)
+        ASTGenSuite.counter = 1999
 
-    def test_more_complex_program(self):
-        """More complex program"""
-        input = """int main () {
-            putIntLn(4);
-        }"""
-        expect = str(Program([FuncDecl(Id("main"),[],IntType(),Block([],[CallExpr(Id("putIntLn"),[IntLiteral(4)])]))]))
-        self.assertTrue(TestAST.test(input,expect,301))
+    def _test(self, testcase, expect):
+        ASTGenSuite.counter += 1
+        try:
+            self.assertTrue(TestAST.test(testcase, expect, ASTGenSuite.counter))
+        except AssertionError:
+            write_wrong_answer(expect, self.counter)
+            raise AssertionError(f"ast gen failed at test {ASTGenSuite.counter}")
 
-    def test_call_without_parameter(self):
-        """More complex program"""
-        input = """int main () {
-            getIntLn();
-        }"""
-        expect = str(Program([FuncDecl(Id("main"),[],IntType(),Block([],[CallExpr(Id("getIntLn"),[])]))]))
-        self.assertTrue(TestAST.test(input,expect,302))
+    # sample test from BKeL
+    def test_sample_0(self):
+        testcase = "Class Program {}"
+        expect = "Program([ClassDecl(Id(Program),[])])"
+        self._test(testcase, expect)
+
+    def test_sample_1(self):
+        testcase = "Class Rectangle : Shape {}"
+        expect = "Program([ClassDecl(Id(Rectangle),Id(Shape),[])])"
+        self._test(testcase, expect)
+
+    def test_sample_2(self):
+        testcase = \
+"""Class Rectangle {
+    Var length: Int;
+}"""
+        expect = "Program([ClassDecl(Id(Rectangle),[AttributeDecl(Instance,VarDecl(Id(length),IntType))])])"
+        self._test(testcase, expect)
+
+    def test_sample_3(self):
+        testcase = \
+"""Class Rectangle {
+    Val $x: Int = 10;
+}"""
+        expect = "Program([ClassDecl(Id(Rectangle),[AttributeDecl(Static,ConstDecl(Id($x),IntType,IntLit(10)))])])"
+        self._test(testcase, expect)
+
+
+    # my test
+    def test_simple_0(self):
+        testcase = "Class Program{}"
+        expect = str(AST.Program([AST.ClassDecl(AST.Id("Program"), [])]))
+        self._test(testcase, expect)

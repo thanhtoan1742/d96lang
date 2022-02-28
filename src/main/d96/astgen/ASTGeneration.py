@@ -2,10 +2,11 @@ from D96Visitor import D96Visitor
 from D96Parser import D96Parser
 import AST
 
-from functools import reduce, _initial_missing
+from functools import reduce
 import operator
 
 
+_initial_missing = object()
 def sum_map(func, iterable, init = _initial_missing):
     "init is reduce's _initial_missing"
     return reduce(
@@ -55,7 +56,16 @@ class ASTGeneration(D96Visitor):
 
 
     def visitAttr_decl(self, ctx: D96Parser.Attr_declContext):
-        return self.visit(ctx.var_decl_mix())
+        decls = self.visit(ctx.var_decl_mix())
+        res = []
+        for decl in decls:
+            if isinstance(decl, AST.VarDecl):
+                kind = self.getKind(decl.variable)
+            else:
+                kind = self.getKind(decl.constant)
+            res.append(AST.AttributeDecl(kind, decl))
+        return res
+
 
 
     def visitMethod_decl(self, ctx: D96Parser.Method_declContext):
