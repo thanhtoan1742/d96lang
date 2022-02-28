@@ -45,7 +45,69 @@ class ASTGenSuite(unittest.TestCase):
 
 
     # my test
-    def test_simple_0(self):
+    def test_class_decl_0(self):
         testcase = "Class Program{}"
         expect = str(AST.Program([AST.ClassDecl(AST.Id("Program"), [])]))
         self._test(testcase, expect)
+
+    def test_class_decl_1(self):
+        testcase = "Class Program{} Class Program2{}"
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), []),
+            AST.ClassDecl(AST.Id("Program2"), [])
+        ]))
+        self._test(testcase, expect)
+
+
+    def test_class_mems_0(self):
+        testcase = \
+"""Class Program {
+    Var i: Int = 10;
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.AttributeDecl(AST.Instance() ,AST.VarDecl(
+                    AST.Id("i"),
+                    AST.IntType(),
+                    AST.IntLiteral(10)
+                ))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_class_mems_1(self):
+        testcase = \
+"""Class Program {
+    Var $i: Int = 10;
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.AttributeDecl(AST.Static() ,AST.VarDecl(
+                    AST.Id("$i"),
+                    AST.IntType(),
+                    AST.IntLiteral(10)
+                ))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_class_mems_2(self):
+        testcase = \
+"""Class Program {
+    Var a, $b: Int = 10;
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.AttributeDecl(AST.Instance() ,AST.VarDecl(
+                    AST.Id("a"),
+                    AST.IntType(),
+                    AST.IntLiteral(10)
+                )),
+                AST.AttributeDecl(AST.Static() ,AST.VarDecl(
+                    AST.Id("$b"),
+                    AST.IntType(),
+                ))
+            ]),
+        ]))
+        self._test(testcase, expect)
+

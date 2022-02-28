@@ -109,19 +109,12 @@ class ASTGeneration(D96Visitor):
 
 
     def visitStmt_block(self, ctx: D96Parser.Stmt_blockContext):
-        all = sum_map(
+        insts = sum_map(
             lambda s: self.visit(s),
             ctx.stmt(),
             []
         )
-        decls = []
-        stmts = []
-        for a in all:
-            if isinstance(a, AST.Decl):
-                decls.append(a)
-            else:
-                stmts.append(a)
-        return AST.Block(decls, stmts)
+        return AST.Block(insts)
 
     def visitStmt(self, ctx: D96Parser.StmtContext):
         if ctx.var_decl_stmt():
@@ -180,7 +173,7 @@ class ASTGeneration(D96Visitor):
         expr2 = self.visit(ctx.exp(1))
         expr3 = self.visit(ctx.exp(2))
         body = self.visit(ctx.stmt_block())
-        return AST.For(id, expr1, expr2, expr3, body)
+        return AST.For(id, expr1, expr2, body, expr3)
 
 
     def visitBreak_stmt(self, ctx: D96Parser.Break_stmtContext):
