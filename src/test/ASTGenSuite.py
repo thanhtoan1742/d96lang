@@ -282,6 +282,90 @@ class ASTGenSuite(unittest.TestCase):
         self._test(testcase, expect)
 
 
+    # var decl stmt test
+
+    def test_var_decl_stmt_0(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Var i: Int;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.VarDecl(AST.Id("i"), AST.IntType()),
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_var_decl_stmt_1(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Val i: Int;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.ConstDecl(AST.Id("i"), AST.IntType()),
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_var_decl_stmt_2(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Var i: Int = 1;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.VarDecl(AST.Id("i"), AST.IntType(), AST.IntLiteral(1)),
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_var_decl_stmt_3(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Val i: Int = 1;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.ConstDecl(AST.Id("i"), AST.IntType(), AST.IntLiteral(1)),
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_var_decl_stmt_4(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Val i, j: Int = 1;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.ConstDecl(AST.Id("i"), AST.IntType(), AST.IntLiteral(1)),
+                    AST.ConstDecl(AST.Id("j"), AST.IntType()),
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
 
     # block stmt
     def test_block_stmt_0(self):
