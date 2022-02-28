@@ -45,6 +45,7 @@ class ASTGenSuite(unittest.TestCase):
 
 
     # my test
+    # class decl
     def test_class_decl_0(self):
         testcase = "Class Program{}"
         expect = str(AST.Program([AST.ClassDecl(AST.Id("Program"), [])]))
@@ -59,7 +60,8 @@ class ASTGenSuite(unittest.TestCase):
         self._test(testcase, expect)
 
 
-    def test_class_mems_0(self):
+    # class attr decl
+    def test_attr_decl_0(self):
         testcase = \
 """Class Program {
     Var i: Int = 10;
@@ -75,7 +77,8 @@ class ASTGenSuite(unittest.TestCase):
         ]))
         self._test(testcase, expect)
 
-    def test_class_mems_1(self):
+
+    def test_attr_decl_1(self):
         testcase = \
 """Class Program {
     Var $i: Int = 10;
@@ -91,7 +94,7 @@ class ASTGenSuite(unittest.TestCase):
         ]))
         self._test(testcase, expect)
 
-    def test_class_mems_2(self):
+    def test_attr_decl_2(self):
         testcase = \
 """Class Program {
     Var a, $b: Int = 10;
@@ -110,4 +113,224 @@ class ASTGenSuite(unittest.TestCase):
             ]),
         ]))
         self._test(testcase, expect)
+
+    def test_attr_decl_3(self):
+        testcase = \
+"""Class Program {
+    Var a, $b: Int = 10;
+    Val s: String = "text";
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.AttributeDecl(AST.Instance() ,AST.VarDecl(
+                    AST.Id("a"),
+                    AST.IntType(),
+                    AST.IntLiteral(10)
+                )),
+                AST.AttributeDecl(AST.Static() ,AST.VarDecl(
+                    AST.Id("$b"),
+                    AST.IntType(),
+                )),
+                AST.AttributeDecl(AST.Instance() ,AST.ConstDecl(
+                    AST.Id("s"),
+                    AST.StringType(),
+                    AST.StringLiteral("text")
+                ))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_attr_decl_4(self):
+        testcase = \
+"""Class Program {
+    Var a, $b: Int = 10;
+    Val s, t: String = "text";
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.AttributeDecl(AST.Instance() ,AST.VarDecl(
+                    AST.Id("a"),
+                    AST.IntType(),
+                    AST.IntLiteral(10)
+                )),
+                AST.AttributeDecl(AST.Static() ,AST.VarDecl(
+                    AST.Id("$b"),
+                    AST.IntType(),
+                )),
+                AST.AttributeDecl(AST.Instance() ,AST.ConstDecl(
+                    AST.Id("s"),
+                    AST.StringType(),
+                    AST.StringLiteral("text")
+                )),
+                AST.AttributeDecl(AST.Instance() ,AST.ConstDecl(
+                    AST.Id("t"),
+                    AST.StringType(),
+                ))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+
+    def test_method_decl_0(self):
+        testcase = \
+"""Class Program {
+    main() {
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_method_decl_1(self):
+        testcase = \
+"""Class Program {
+    $main() {
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Static(), AST.Id("$main"), [], AST.Block([]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_method_decl_2(self):
+        testcase = \
+"""Class Program {
+    main() {}
+    $staticMethod() {}
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([])),
+                AST.MethodDecl(AST.Static(), AST.Id("$staticMethod"), [], AST.Block([])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_method_decl_3(self):
+        testcase = \
+"""Class Program {
+    Constructor() {}
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("Constructor"), [], AST.Block([])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_method_decl_4(self):
+        testcase = \
+"""Class Program {
+    Constructor(arg: String) {}
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("Constructor"), [
+                    AST.VarDecl(AST.Id("arg"), AST.StringType())
+                ], AST.Block([])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_method_decl_5(self):
+        testcase = \
+"""Class Program {
+    Destructor() {}
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("Destructor"), [], AST.Block([])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_method_decl_6(self):
+        testcase = \
+"""Class Agent{
+    takeDamage(damage: Int; damageType: DamageType) {}
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Agent"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("takeDamage"), [
+                    AST.VarDecl(AST.Id('damage'), AST.IntType()),
+                    AST.VarDecl(AST.Id('damageType'), AST.ClassType(AST.Id('DamageType'))),
+                ], AST.Block([])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_method_decl_6(self):
+        testcase = \
+"""Class Agent{
+    takeBlind(blindDuration, blindRadius: Int; blindType: BlindType) {}
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Agent"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("takeBlind"), [
+                    AST.VarDecl(AST.Id('blindDuration'), AST.IntType()),
+                    AST.VarDecl(AST.Id('blindRadius'), AST.IntType()),
+                    AST.VarDecl(AST.Id('blindType'), AST.ClassType(AST.Id('BlindType'))),
+                ], AST.Block([])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+
+    # block stmt
+    def test_block_stmt_0(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Val a: Int = 2;
+        Return a;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.ConstDecl(AST.Id("a"), AST.IntType(), AST.IntLiteral(2)),
+                    AST.Return(AST.Id('a'))
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+    # for stmt
+    def test_for_stmt_0(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Foreach(i In 1 .. 100 By 2) {
+            Out.printInt(i);
+        }
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.For(
+                        AST.Id('i'),
+                        AST.IntLiteral(1),
+                        AST.IntLiteral(100),
+                        AST.Block([
+                            AST.CallStmt(AST.Id('Out'), AST.Id('printInt'), [
+                                AST.Id('i')
+                            ])
+                        ]),
+                        AST.IntLiteral(2)
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
 
