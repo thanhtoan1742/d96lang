@@ -282,8 +282,85 @@ class ASTGenSuite(unittest.TestCase):
         self._test(testcase, expect)
 
 
-    # var decl stmt test
+    # test assign stmt
+    def test_assign_stmt_0(self):
+        testcase = \
+"""Class Program{
+    main() {
+        i = 1;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Assign(AST.Id("i"), AST.IntLiteral(1))
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
 
+    def test_assign_stmt_1(self):
+        testcase = \
+"""Class Program{
+    main() {
+        arr[0][1][2] = 1;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Assign(
+                        AST.ArrayCell(AST.Id("arr"), [
+                            AST.IntLiteral(0),
+                            AST.IntLiteral(1),
+                            AST.IntLiteral(2),
+                        ]),
+                        AST.IntLiteral(1),
+                    )
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_assign_stmt_2(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Self.i = 1;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Assign(
+                        AST.FieldAccess(AST.SelfLiteral(), AST.Id('i')),
+                        AST.IntLiteral(1),
+                    )
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_assign_stmt_3(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Program::$i = 1;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Assign(
+                        AST.FieldAccess(AST.Id('Program'), AST.Id('$i')),
+                        AST.IntLiteral(1),
+                    )
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    # var decl stmt test
     def test_var_decl_stmt_0(self):
         testcase = \
 """Class Program{
@@ -524,29 +601,53 @@ class ASTGenSuite(unittest.TestCase):
         self._test(testcase, expect)
 
 
-
-    # block stmt
-    def test_block_stmt_0(self):
+    # for stmt
+    def test_for_stmt_0(self):
         testcase = \
 """Class Program {
     main() {
-        Val a: Int = 2;
-        Return a;
+        Foreach(i In 1 .. 100) {
+        }
     }
 }"""
         expect = str(AST.Program([
             AST.ClassDecl(AST.Id("Program"), [
                 AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
-                    AST.ConstDecl(AST.Id("a"), AST.IntType(), AST.IntLiteral(2)),
-                    AST.Return(AST.Id('a'))
+                    AST.For(
+                        AST.Id('i'),
+                        AST.IntLiteral(1),
+                        AST.IntLiteral(100),
+                        AST.Block([]),
+                    )
                 ]))
             ]),
         ]))
         self._test(testcase, expect)
 
+    def test_for_stmt_1(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Foreach(i In 1 .. 100 By 2) {
+        }
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.For(
+                        AST.Id('i'),
+                        AST.IntLiteral(1),
+                        AST.IntLiteral(100),
+                        AST.Block([]),
+                        AST.IntLiteral(2),
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
 
-    # for stmt
-    def test_for_stmt_0(self):
+    def test_for_stmt_3(self):
         testcase = \
 """Class Program {
     main() {
@@ -569,6 +670,157 @@ class ASTGenSuite(unittest.TestCase):
                         ]),
                         AST.IntLiteral(2)
                     )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+    # continue stmt
+    def test_continue_stmt_0(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Foreach(i In 1 .. 100 By 2) {
+            Continue;
+        }
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.For(
+                        AST.Id('i'),
+                        AST.IntLiteral(1),
+                        AST.IntLiteral(100),
+                        AST.Block([
+                            AST.Continue()
+                        ]),
+                        AST.IntLiteral(2),
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+    # break stmt
+    def test_break_stmt_0(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Foreach(i In 1 .. 100 By 2) {
+            Break;
+        }
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.For(
+                        AST.Id('i'),
+                        AST.IntLiteral(1),
+                        AST.IntLiteral(100),
+                        AST.Block([
+                            AST.Break()
+                        ]),
+                        AST.IntLiteral(2),
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+
+    # method invoke stmt
+    def test_method_invoke_stmt_0(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Out.printInt(1);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.CallStmt(AST.Id("Out"), AST.Id("printInt"), [AST.IntLiteral(1)])
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_method_invoke_stmt_1(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Out.printInt(1, 2);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.CallStmt(AST.Id("Out"), AST.Id("printInt"), [
+                        AST.IntLiteral(1),
+                        AST.IntLiteral(2),
+                    ])
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_method_invoke_stmt_2(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Humanity::$getPopulation();
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.CallStmt(AST.Id("Humanity"), AST.Id("$getPopulation"), [])
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_method_invoke_stmt_3(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Humanity::$getPopulation(True);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.CallStmt(AST.Id("Humanity"), AST.Id("$getPopulation"), [
+                        AST.BooleanLiteral(True)
+                    ])
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+
+
+
+    # block stmt
+    def test_block_stmt_0(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Val a: Int = 2;
+        Return a;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.ConstDecl(AST.Id("a"), AST.IntType(), AST.IntLiteral(2)),
+                    AST.Return(AST.Id('a'))
                 ]))
             ]),
         ]))

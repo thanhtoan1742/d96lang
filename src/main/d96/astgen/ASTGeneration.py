@@ -146,8 +146,12 @@ class ASTGeneration(D96Visitor):
         id = AST.Id(ctx.ID().getText())
         if ctx.getChildCount() == 1:
             return id
-        exp = self.visit(ctx.exp())
-        return AST.FieldAccess(exp, id)
+        if ctx.exp():
+            exp = self.visit(ctx.exp())
+            return AST.FieldAccess(exp, id)
+        sid = AST.Id(ctx.STATIC_ID().getText())
+        return AST.FieldAccess(id, sid)
+
 
     def visitIdx_exp(self, ctx: D96Parser.Idx_expContext):
         arr = self.visit(ctx.exp8())
@@ -171,7 +175,7 @@ class ASTGeneration(D96Visitor):
         id = self.visit(ctx.scalar_var())
         expr1 = self.visit(ctx.exp(0))
         expr2 = self.visit(ctx.exp(1))
-        expr3 = self.visit(ctx.exp(2))
+        expr3 = self.visit(ctx.exp(2)) if ctx.exp(2) else None
         body = self.visit(ctx.stmt_block())
         return AST.For(id, expr1, expr2, body, expr3)
 
