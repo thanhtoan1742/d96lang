@@ -805,14 +805,32 @@ class ASTGenSuite(unittest.TestCase):
 
 
 
-
-
     # block stmt
     def test_block_stmt_0(self):
         testcase = \
 """Class Program {
     main() {
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_block_stmt_1(self):
+        testcase = \
+"""Class Program {
+    main() {
         Val a: Int = 2;
+        If (a > 0) {
+            a = 1;
+        }
+        Else {
+            a = 0;
+        }
         Return a;
     }
 }"""
@@ -820,6 +838,11 @@ class ASTGenSuite(unittest.TestCase):
             AST.ClassDecl(AST.Id("Program"), [
                 AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
                     AST.ConstDecl(AST.Id("a"), AST.IntType(), AST.IntLiteral(2)),
+                    AST.If(
+                        AST.BinaryOp(">", AST.Id("a"), AST.IntLiteral(0)),
+                        AST.Block([AST.Assign(AST.Id("a"), AST.IntLiteral(1))]),
+                        AST.Block([AST.Assign(AST.Id("a"), AST.IntLiteral(0))]),
+                    ),
                     AST.Return(AST.Id('a'))
                 ]))
             ]),
@@ -828,3 +851,558 @@ class ASTGenSuite(unittest.TestCase):
 
 
 
+    # binary op
+    def test_binary_op_0(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return (1 > 2);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.BinaryOp(">", AST.IntLiteral(1), AST.IntLiteral(2))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_binary_op_1(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return (1 < 2);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.BinaryOp("<", AST.IntLiteral(1), AST.IntLiteral(2))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_binary_op_2(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return (1 == 2);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.BinaryOp("==", AST.IntLiteral(1), AST.IntLiteral(2))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_binary_op_3(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return (1 != 2);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.BinaryOp("!=", AST.IntLiteral(1), AST.IntLiteral(2))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_binary_op_4(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return (1 <= 2);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.BinaryOp("<=", AST.IntLiteral(1), AST.IntLiteral(2))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_binary_op_5(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return (1 >= 2);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.BinaryOp(">=", AST.IntLiteral(1), AST.IntLiteral(2))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_binary_op_6(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return ("1" +. "2");
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.BinaryOp("+.", AST.StringLiteral("1"), AST.StringLiteral("2"))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_binary_op_7(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return ("1" ==. "2");
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.BinaryOp("==.", AST.StringLiteral("1"), AST.StringLiteral("2"))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_binary_op_8(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return (True && False);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.BinaryOp("&&", AST.BooleanLiteral(True), AST.BooleanLiteral(False))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_binary_op_9(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return (True || False);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.BinaryOp("||", AST.BooleanLiteral(True), AST.BooleanLiteral(False))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_binary_op_10(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return (1 + 2);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.BinaryOp("+", AST.IntLiteral(1), AST.IntLiteral(2))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_binary_op_11(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return (1 - 2);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.BinaryOp("-", AST.IntLiteral(1), AST.IntLiteral(2))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_binary_op_12(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return (1 * 2);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.BinaryOp("*", AST.IntLiteral(1), AST.IntLiteral(2))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_binary_op_13(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return (1 / 2);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.BinaryOp("/", AST.IntLiteral(1), AST.IntLiteral(2))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_binary_op_14(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return (1 % 2);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.BinaryOp("%", AST.IntLiteral(1), AST.IntLiteral(2))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+    # test unary op
+    def test_unary_op_0(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return (!True);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.UnaryOp('!', AST.BooleanLiteral(True))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_unary_op_1(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return (-1);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.UnaryOp('-', AST.IntLiteral(1))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+    # member access
+    def test_member_access_0(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return Self.i;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.FieldAccess(AST.SelfLiteral(), AST.Id("i"))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_member_access_1(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return Self.i();
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.CallExpr(AST.SelfLiteral(), AST.Id("i"), [])
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_member_access_2(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return Self.i(1, False, "a");
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.CallExpr(AST.SelfLiteral(), AST.Id("i"), [
+                            AST.IntLiteral(1),
+                            AST.BooleanLiteral(False),
+                            AST.StringLiteral("a"),
+                        ])
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_member_access_3(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return Program::$i;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.FieldAccess(AST.Id("Program"), AST.Id("$i"))
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_member_access_4(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return Program::$i();
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.CallExpr(AST.Id("Program"), AST.Id("$i"), [])
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_member_access_5(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return Program::$i(1, False, "a");
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.CallExpr(AST.Id("Program"), AST.Id("$i"), [
+                            AST.IntLiteral(1),
+                            AST.BooleanLiteral(False),
+                            AST.StringLiteral("a"),
+                        ])
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+    # index op
+    def test_index_op_0(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return arr[0];
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.ArrayCell(AST.Id("arr"), [
+                            AST.IntLiteral(0)
+                        ])
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_index_op_1(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return arr[0][1][2][3];
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.ArrayCell(AST.Id("arr"), [
+                            AST.IntLiteral(0),
+                            AST.IntLiteral(1),
+                            AST.IntLiteral(2),
+                            AST.IntLiteral(3),
+                        ])
+                    )
+                ]))
+            ]),
+        ]))
+
+    def test_index_op_2(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return arr[i][i + 1][i + 2][i + 3];
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.ArrayCell(AST.Id("arr"), [
+                            AST.Id("i"),
+                            AST.BinaryOp("+", AST.Id("i"), AST.IntLiteral(1)),
+                            AST.BinaryOp("+", AST.Id("i"), AST.IntLiteral(2)),
+                            AST.BinaryOp("+", AST.Id("i"), AST.IntLiteral(3)),
+                        ])
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+    # new op
+    def test_new_op_0(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return New Program();
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.NewExpr(AST.Id("Program"), [])
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_new_op_1(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return New Program(1, False, "a");
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.NewExpr(AST.Id("Program"), [
+                            AST.IntLiteral(1),
+                            AST.BooleanLiteral(False),
+                            AST.StringLiteral("a"),
+                        ])
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+    # self
+    def test_self_0(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return Self;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(
+                        AST.SelfLiteral()
+                    )
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
