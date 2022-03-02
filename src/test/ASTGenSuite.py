@@ -382,6 +382,27 @@ class ASTGenSuite(unittest.TestCase):
         ]))
         self._test(testcase, expect)
 
+    def test_assign_stmt_4(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Program::$i = Input.readInt();
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Assign(
+                        AST.FieldAccess(AST.Id('Program'), AST.Id('$i')),
+                        AST.CallExpr(AST.Id("Input"), AST.Id("readInt"), []),
+                    )
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+
     # var decl stmt test
     def test_var_decl_stmt_0(self):
         testcase = \
@@ -661,6 +682,38 @@ class ASTGenSuite(unittest.TestCase):
             AST.ClassDecl(AST.Id("Program"), [
                 AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
                     AST.Return(AST.IntLiteral(0))
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_return_stmt_2(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return New Shape();
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(AST.NewExpr(AST.Id("Shape"), []))
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_return_stmt_3(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Return New Shape(1);
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.Return(AST.NewExpr(AST.Id("Shape"), [AST.IntLiteral(1)]))
                 ]))
             ]),
         ]))
@@ -1579,4 +1632,546 @@ class ASTGenSuite(unittest.TestCase):
             ]),
         ]))
         self._test(testcase, expect)
+
+
+    # full program
+    def test_program_0(self):
+        testcase = \
+"""Class Program {
+    main() {
+        Out.print("Hello World!");
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.CallStmt(AST.Id("Out"), AST.Id("print"), [AST.StringLiteral("Hello World!")])
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_program_1(self):
+        testcase = \
+"""
+Class Vector3 {
+    Var x, y, z: Float = 0, 0, 0;
+}
+
+Class Program {
+    main() {
+        Val coord: Vector3;
+    }
+}
+"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Vector3"), [
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("x"), AST.FloatType(), AST.IntLiteral(0))),
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("y"), AST.FloatType(), AST.IntLiteral(0))),
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("z"), AST.FloatType(), AST.IntLiteral(0))),
+            ]),
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.ConstDecl(AST.Id("coord"), AST.ClassType(AST.Id("Vector3"))),
+                ]))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_program_2(self):
+        testcase = \
+"""
+Class Vector3 {
+    Var x, y, z: Float = 0, 0, 0;
+}
+
+Class Program {
+    triangleArea(a, b, c: Vector3) {
+
+    }
+
+    main() {
+    }
+}
+"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Vector3"), [
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("x"), AST.FloatType(), AST.IntLiteral(0))),
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("y"), AST.FloatType(), AST.IntLiteral(0))),
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("z"), AST.FloatType(), AST.IntLiteral(0))),
+            ]),
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("triangleArea"), [
+                    AST.VarDecl(AST.Id("a"), AST.ClassType(AST.Id("Vector3"))),
+                    AST.VarDecl(AST.Id("b"), AST.ClassType(AST.Id("Vector3"))),
+                    AST.VarDecl(AST.Id("c"), AST.ClassType(AST.Id("Vector3"))),
+                ], AST.Block([
+                ])),
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+    def test_program_3(self):
+        testcase = \
+"""
+Class Vector3 {
+    Var x, y, z: Float = 0, 0, 0;
+}
+
+Class Program {
+    triangleArea(a, b, c: Vector3) {
+        Val S: Float = (a.x + b.x)*(a.y - b.y) + (b.x + c.x)*(b.y - c.y) + (c.x + a.x)*(c.y - a.y);
+        Return Math::$abs(S) / 2;
+    }
+
+    main() {
+    }
+}
+"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Vector3"), [
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("x"), AST.FloatType(), AST.IntLiteral(0))),
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("y"), AST.FloatType(), AST.IntLiteral(0))),
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("z"), AST.FloatType(), AST.IntLiteral(0))),
+            ]),
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("triangleArea"), [
+                    AST.VarDecl(AST.Id("a"), AST.ClassType(AST.Id("Vector3"))),
+                    AST.VarDecl(AST.Id("b"), AST.ClassType(AST.Id("Vector3"))),
+                    AST.VarDecl(AST.Id("c"), AST.ClassType(AST.Id("Vector3"))),
+                ], AST.Block([
+                    AST.ConstDecl(AST.Id("S"), AST.FloatType(), AST.BinaryOp(
+                        "+",
+                        AST.BinaryOp(
+                            "+",
+                            AST.BinaryOp(
+                                "*",
+                                AST.BinaryOp(
+                                    "+",
+                                    AST.FieldAccess(AST.Id("a"), AST.Id("x")),
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("x")),
+                                ),
+                                AST.BinaryOp(
+                                    "-",
+                                    AST.FieldAccess(AST.Id("a"), AST.Id("y")),
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("y")),
+                                ),
+                            ),
+                            AST.BinaryOp(
+                                "*",
+                                AST.BinaryOp(
+                                    "+",
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("x")),
+                                    AST.FieldAccess(AST.Id("c"), AST.Id("x")),
+                                ),
+                                AST.BinaryOp(
+                                    "-",
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("y")),
+                                    AST.FieldAccess(AST.Id("c"), AST.Id("y")),
+                                ),
+                            ),
+                        ),
+                        AST.BinaryOp(
+                            "*",
+                            AST.BinaryOp(
+                                "+",
+                                AST.FieldAccess(AST.Id("c"), AST.Id("x")),
+                                AST.FieldAccess(AST.Id("a"), AST.Id("x")),
+                            ),
+                            AST.BinaryOp(
+                                "-",
+                                AST.FieldAccess(AST.Id("c"), AST.Id("y")),
+                                AST.FieldAccess(AST.Id("a"), AST.Id("y")),
+                            ),
+                        ),
+                    )),
+                    AST.Return(AST.BinaryOp(
+                        "/",
+                        AST.CallExpr(
+                            AST.Id("Math"),
+                            AST.Id("$abs"),
+                            [AST.Id("S")]
+                        ),
+                        AST.IntLiteral(2),
+                    ))
+                ])),
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_program_4(self):
+        testcase = \
+"""
+Class Vector3 {
+    Var x, y, z: Float = 0, 0, 0;
+    Constructor(x, y, z: Float) {
+        Self.x = x;
+        Self.y = y;
+        Self.z = z;
+    }
+}
+
+Class Program {
+    triangleArea(a, b, c: Vector3) {
+        Val S: Float = (a.x + b.x)*(a.y - b.y) + (b.x + c.x)*(b.y - c.y) + (c.x + a.x)*(c.y - a.y);
+        Return Math::$abs(S) / 2;
+    }
+
+    main() {
+    }
+}
+"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Vector3"), [
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("x"), AST.FloatType(), AST.IntLiteral(0))),
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("y"), AST.FloatType(), AST.IntLiteral(0))),
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("z"), AST.FloatType(), AST.IntLiteral(0))),
+                AST.MethodDecl(AST.Instance(), AST.Id("Constructor"), [
+                    AST.VarDecl(AST.Id("x"), AST.FloatType()),
+                    AST.VarDecl(AST.Id("y"), AST.FloatType()),
+                    AST.VarDecl(AST.Id("z"), AST.FloatType()),
+                ], AST.Block([
+                    AST.Assign(AST.FieldAccess(AST.SelfLiteral(), AST.Id("x")), AST.Id("x")),
+                    AST.Assign(AST.FieldAccess(AST.SelfLiteral(), AST.Id("y")), AST.Id("y")),
+                    AST.Assign(AST.FieldAccess(AST.SelfLiteral(), AST.Id("z")), AST.Id("z")),
+                ]))
+            ]),
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("triangleArea"), [
+                    AST.VarDecl(AST.Id("a"), AST.ClassType(AST.Id("Vector3"))),
+                    AST.VarDecl(AST.Id("b"), AST.ClassType(AST.Id("Vector3"))),
+                    AST.VarDecl(AST.Id("c"), AST.ClassType(AST.Id("Vector3"))),
+                ], AST.Block([
+                    AST.ConstDecl(AST.Id("S"), AST.FloatType(), AST.BinaryOp(
+                        "+",
+                        AST.BinaryOp(
+                            "+",
+                            AST.BinaryOp(
+                                "*",
+                                AST.BinaryOp(
+                                    "+",
+                                    AST.FieldAccess(AST.Id("a"), AST.Id("x")),
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("x")),
+                                ),
+                                AST.BinaryOp(
+                                    "-",
+                                    AST.FieldAccess(AST.Id("a"), AST.Id("y")),
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("y")),
+                                ),
+                            ),
+                            AST.BinaryOp(
+                                "*",
+                                AST.BinaryOp(
+                                    "+",
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("x")),
+                                    AST.FieldAccess(AST.Id("c"), AST.Id("x")),
+                                ),
+                                AST.BinaryOp(
+                                    "-",
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("y")),
+                                    AST.FieldAccess(AST.Id("c"), AST.Id("y")),
+                                ),
+                            ),
+                        ),
+                        AST.BinaryOp(
+                            "*",
+                            AST.BinaryOp(
+                                "+",
+                                AST.FieldAccess(AST.Id("c"), AST.Id("x")),
+                                AST.FieldAccess(AST.Id("a"), AST.Id("x")),
+                            ),
+                            AST.BinaryOp(
+                                "-",
+                                AST.FieldAccess(AST.Id("c"), AST.Id("y")),
+                                AST.FieldAccess(AST.Id("a"), AST.Id("y")),
+                            ),
+                        ),
+                    )),
+                    AST.Return(AST.BinaryOp(
+                        "/",
+                        AST.CallExpr(
+                            AST.Id("Math"),
+                            AST.Id("$abs"),
+                            [AST.Id("S")]
+                        ),
+                        AST.IntLiteral(2),
+                    ))
+                ])),
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+    def test_program_5(self):
+        testcase = \
+"""
+Class Vector3 {
+    Var x, y, z: Float = 0, 0, 0;
+    Constructor(x, y, z: Float) {
+        Self.x = x;
+        Self.y = y;
+        Self.z = z;
+    }
+
+    $read() {
+        Var x, y, z: Float;
+        x = Input.readFloat();
+        y = Input.readFloat();
+        z = Input.readFloat();
+        Return New Vector3(x, y, z);
+    }
+}
+
+Class Program {
+    triangleArea(a, b, c: Vector3) {
+        Val S: Float = (a.x + b.x)*(a.y - b.y) + (b.x + c.x)*(b.y - c.y) + (c.x + a.x)*(c.y - a.y);
+        Return Math::$abs(S) / 2;
+    }
+
+    main() {
+    }
+}
+"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Vector3"), [
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("x"), AST.FloatType(), AST.IntLiteral(0))),
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("y"), AST.FloatType(), AST.IntLiteral(0))),
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("z"), AST.FloatType(), AST.IntLiteral(0))),
+                AST.MethodDecl(AST.Instance(), AST.Id("Constructor"), [
+                    AST.VarDecl(AST.Id("x"), AST.FloatType()),
+                    AST.VarDecl(AST.Id("y"), AST.FloatType()),
+                    AST.VarDecl(AST.Id("z"), AST.FloatType()),
+                ], AST.Block([
+                    AST.Assign(AST.FieldAccess(AST.SelfLiteral(), AST.Id("x")), AST.Id("x")),
+                    AST.Assign(AST.FieldAccess(AST.SelfLiteral(), AST.Id("y")), AST.Id("y")),
+                    AST.Assign(AST.FieldAccess(AST.SelfLiteral(), AST.Id("z")), AST.Id("z")),
+                ])),
+                AST.MethodDecl(AST.Static(), AST.Id("$read"), [], AST.Block([
+                    AST.VarDecl(AST.Id("x"), AST.FloatType()),
+                    AST.VarDecl(AST.Id("y"), AST.FloatType()),
+                    AST.VarDecl(AST.Id("z"), AST.FloatType()),
+                    AST.Assign(AST.Id("x"), AST.CallExpr(AST.Id("Input"), AST.Id("readFloat"), [])),
+                    AST.Assign(AST.Id("y"), AST.CallExpr(AST.Id("Input"), AST.Id("readFloat"), [])),
+                    AST.Assign(AST.Id("z"), AST.CallExpr(AST.Id("Input"), AST.Id("readFloat"), [])),
+                    AST.Return(AST.NewExpr(AST.Id("Vector3"), [
+                        AST.Id("x"),
+                        AST.Id("y"),
+                        AST.Id("z"),
+                    ]))
+                ])),
+            ]),
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("triangleArea"), [
+                    AST.VarDecl(AST.Id("a"), AST.ClassType(AST.Id("Vector3"))),
+                    AST.VarDecl(AST.Id("b"), AST.ClassType(AST.Id("Vector3"))),
+                    AST.VarDecl(AST.Id("c"), AST.ClassType(AST.Id("Vector3"))),
+                ], AST.Block([
+                    AST.ConstDecl(AST.Id("S"), AST.FloatType(), AST.BinaryOp(
+                        "+",
+                        AST.BinaryOp(
+                            "+",
+                            AST.BinaryOp(
+                                "*",
+                                AST.BinaryOp(
+                                    "+",
+                                    AST.FieldAccess(AST.Id("a"), AST.Id("x")),
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("x")),
+                                ),
+                                AST.BinaryOp(
+                                    "-",
+                                    AST.FieldAccess(AST.Id("a"), AST.Id("y")),
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("y")),
+                                ),
+                            ),
+                            AST.BinaryOp(
+                                "*",
+                                AST.BinaryOp(
+                                    "+",
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("x")),
+                                    AST.FieldAccess(AST.Id("c"), AST.Id("x")),
+                                ),
+                                AST.BinaryOp(
+                                    "-",
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("y")),
+                                    AST.FieldAccess(AST.Id("c"), AST.Id("y")),
+                                ),
+                            ),
+                        ),
+                        AST.BinaryOp(
+                            "*",
+                            AST.BinaryOp(
+                                "+",
+                                AST.FieldAccess(AST.Id("c"), AST.Id("x")),
+                                AST.FieldAccess(AST.Id("a"), AST.Id("x")),
+                            ),
+                            AST.BinaryOp(
+                                "-",
+                                AST.FieldAccess(AST.Id("c"), AST.Id("y")),
+                                AST.FieldAccess(AST.Id("a"), AST.Id("y")),
+                            ),
+                        ),
+                    )),
+                    AST.Return(AST.BinaryOp(
+                        "/",
+                        AST.CallExpr(
+                            AST.Id("Math"),
+                            AST.Id("$abs"),
+                            [AST.Id("S")]
+                        ),
+                        AST.IntLiteral(2),
+                    ))
+                ])),
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
+    def test_program_6(self):
+        testcase = \
+"""
+Class Vector3 {
+    Var x, y, z: Float = 0, 0, 0;
+    Constructor(x, y, z: Float) {
+        Self.x = x;
+        Self.y = y;
+        Self.z = z;
+    }
+
+    $read() {
+        Var x, y, z: Float;
+        x = Input.readFloat();
+        y = Input.readFloat();
+        z = Input.readFloat();
+        Return New Vector3(x, y, z);
+    }
+}
+
+Class Program {
+    triangleArea(a, b, c: Vector3) {
+        Val S: Float = (a.x + b.x)*(a.y - b.y) + (b.x + c.x)*(b.y - c.y) + (c.x + a.x)*(c.y - a.y);
+        Return Math::$abs(S) / 2;
+    }
+
+    main() {
+        Val a: Vector3 = Vector3::$read();
+        Val b: Vector3 = Vector3::$read();
+        Val c: Vector3 = Vector3::$read();
+        Output.printFloat(Self.triangleArea(a, b, c));
+    }
+}
+"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Vector3"), [
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("x"), AST.FloatType(), AST.IntLiteral(0))),
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("y"), AST.FloatType(), AST.IntLiteral(0))),
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(AST.Id("z"), AST.FloatType(), AST.IntLiteral(0))),
+                AST.MethodDecl(AST.Instance(), AST.Id("Constructor"), [
+                    AST.VarDecl(AST.Id("x"), AST.FloatType()),
+                    AST.VarDecl(AST.Id("y"), AST.FloatType()),
+                    AST.VarDecl(AST.Id("z"), AST.FloatType()),
+                ], AST.Block([
+                    AST.Assign(AST.FieldAccess(AST.SelfLiteral(), AST.Id("x")), AST.Id("x")),
+                    AST.Assign(AST.FieldAccess(AST.SelfLiteral(), AST.Id("y")), AST.Id("y")),
+                    AST.Assign(AST.FieldAccess(AST.SelfLiteral(), AST.Id("z")), AST.Id("z")),
+                ])),
+                AST.MethodDecl(AST.Static(), AST.Id("$read"), [], AST.Block([
+                    AST.VarDecl(AST.Id("x"), AST.FloatType()),
+                    AST.VarDecl(AST.Id("y"), AST.FloatType()),
+                    AST.VarDecl(AST.Id("z"), AST.FloatType()),
+                    AST.Assign(AST.Id("x"), AST.CallExpr(AST.Id("Input"), AST.Id("readFloat"), [])),
+                    AST.Assign(AST.Id("y"), AST.CallExpr(AST.Id("Input"), AST.Id("readFloat"), [])),
+                    AST.Assign(AST.Id("z"), AST.CallExpr(AST.Id("Input"), AST.Id("readFloat"), [])),
+                    AST.Return(AST.NewExpr(AST.Id("Vector3"), [
+                        AST.Id("x"),
+                        AST.Id("y"),
+                        AST.Id("z"),
+                    ]))
+                ])),
+            ]),
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("triangleArea"), [
+                    AST.VarDecl(AST.Id("a"), AST.ClassType(AST.Id("Vector3"))),
+                    AST.VarDecl(AST.Id("b"), AST.ClassType(AST.Id("Vector3"))),
+                    AST.VarDecl(AST.Id("c"), AST.ClassType(AST.Id("Vector3"))),
+                ], AST.Block([
+                    AST.ConstDecl(AST.Id("S"), AST.FloatType(), AST.BinaryOp(
+                        "+",
+                        AST.BinaryOp(
+                            "+",
+                            AST.BinaryOp(
+                                "*",
+                                AST.BinaryOp(
+                                    "+",
+                                    AST.FieldAccess(AST.Id("a"), AST.Id("x")),
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("x")),
+                                ),
+                                AST.BinaryOp(
+                                    "-",
+                                    AST.FieldAccess(AST.Id("a"), AST.Id("y")),
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("y")),
+                                ),
+                            ),
+                            AST.BinaryOp(
+                                "*",
+                                AST.BinaryOp(
+                                    "+",
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("x")),
+                                    AST.FieldAccess(AST.Id("c"), AST.Id("x")),
+                                ),
+                                AST.BinaryOp(
+                                    "-",
+                                    AST.FieldAccess(AST.Id("b"), AST.Id("y")),
+                                    AST.FieldAccess(AST.Id("c"), AST.Id("y")),
+                                ),
+                            ),
+                        ),
+                        AST.BinaryOp(
+                            "*",
+                            AST.BinaryOp(
+                                "+",
+                                AST.FieldAccess(AST.Id("c"), AST.Id("x")),
+                                AST.FieldAccess(AST.Id("a"), AST.Id("x")),
+                            ),
+                            AST.BinaryOp(
+                                "-",
+                                AST.FieldAccess(AST.Id("c"), AST.Id("y")),
+                                AST.FieldAccess(AST.Id("a"), AST.Id("y")),
+                            ),
+                        ),
+                    )),
+                    AST.Return(AST.BinaryOp(
+                        "/",
+                        AST.CallExpr(
+                            AST.Id("Math"),
+                            AST.Id("$abs"),
+                            [AST.Id("S")]
+                        ),
+                        AST.IntLiteral(2),
+                    ))
+                ])),
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.ConstDecl(AST.Id("a"), AST.ClassType(AST.Id("Vector3")), AST.CallExpr(AST.Id("Vector3"), AST.Id("$read"), [])),
+                    AST.ConstDecl(AST.Id("b"), AST.ClassType(AST.Id("Vector3")), AST.CallExpr(AST.Id("Vector3"), AST.Id("$read"), [])),
+                    AST.ConstDecl(AST.Id("c"), AST.ClassType(AST.Id("Vector3")), AST.CallExpr(AST.Id("Vector3"), AST.Id("$read"), [])),
+                    AST.CallStmt(AST.Id("Output"), AST.Id("printFloat"), [
+                        AST.CallExpr(AST.SelfLiteral(), AST.Id("triangleArea"), [
+                            AST.Id("a"),
+                            AST.Id("b"),
+                            AST.Id("c"),
+                        ])
+                    ]),
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
 
