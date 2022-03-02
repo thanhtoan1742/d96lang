@@ -265,13 +265,35 @@ class ASTGenSuite(unittest.TestCase):
         ]))
         self._test(testcase, expect)
 
-    def test_method_decl_6(self):
+    def test_method_decl_7(self):
         testcase = \
 """Class Agent{
     takeBlind(blindDuration, blindRadius: Int; blindType: BlindType) {}
 }"""
         expect = str(AST.Program([
             AST.ClassDecl(AST.Id("Agent"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("takeBlind"), [
+                    AST.VarDecl(AST.Id('blindDuration'), AST.IntType()),
+                    AST.VarDecl(AST.Id('blindRadius'), AST.IntType()),
+                    AST.VarDecl(AST.Id('blindType'), AST.ClassType(AST.Id('BlindType'))),
+                ], AST.Block([])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_method_decl_8(self):
+        testcase = \
+"""Class Agent{
+    Constructor(name: String) {}
+    Destructor() {}
+    takeBlind(blindDuration, blindRadius: Int; blindType: BlindType) {}
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Agent"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("Constructor"), [
+                    AST.VarDecl(AST.Id("name"), AST.StringType()),
+                ], AST.Block([])),
+                AST.MethodDecl(AST.Instance(), AST.Id("Destructor"), [], AST.Block([])),
                 AST.MethodDecl(AST.Instance(), AST.Id("takeBlind"), [
                     AST.VarDecl(AST.Id('blindDuration'), AST.IntType()),
                     AST.VarDecl(AST.Id('blindRadius'), AST.IntType()),
@@ -437,6 +459,50 @@ class ASTGenSuite(unittest.TestCase):
                 AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
                     AST.ConstDecl(AST.Id("i"), AST.IntType(), AST.IntLiteral(1)),
                     AST.ConstDecl(AST.Id("j"), AST.IntType()),
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_var_decl_stmt_5(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Var a, b, c, d, e: Int = 1, 2, 3;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.VarDecl(AST.Id("a"), AST.IntType(), AST.IntLiteral(1)),
+                    AST.VarDecl(AST.Id("b"), AST.IntType(), AST.IntLiteral(2)),
+                    AST.VarDecl(AST.Id("c"), AST.IntType(), AST.IntLiteral(3)),
+                    AST.VarDecl(AST.Id("d"), AST.IntType()),
+                    AST.VarDecl(AST.Id("e"), AST.IntType()),
+                ])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_var_decl_stmt_6(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Var a, b, c, d, e: Int = 1, 2, 3;
+        Val x, y, z: String = "text";
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([
+                    AST.VarDecl(AST.Id("a"), AST.IntType(), AST.IntLiteral(1)),
+                    AST.VarDecl(AST.Id("b"), AST.IntType(), AST.IntLiteral(2)),
+                    AST.VarDecl(AST.Id("c"), AST.IntType(), AST.IntLiteral(3)),
+                    AST.VarDecl(AST.Id("d"), AST.IntType()),
+                    AST.VarDecl(AST.Id("e"), AST.IntType()),
+                    AST.ConstDecl(AST.Id("x"), AST.StringType(), AST.StringLiteral("text")),
+                    AST.ConstDecl(AST.Id("y"), AST.StringType()),
+                    AST.ConstDecl(AST.Id("z"), AST.StringType()),
                 ])),
             ]),
         ]))
@@ -1406,3 +1472,111 @@ class ASTGenSuite(unittest.TestCase):
             ]),
         ]))
         self._test(testcase, expect)
+
+
+    # type
+    def test_type_0(self):
+        testcase = \
+"""Class Program {
+    Var a: Int;
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(
+                    AST.Id("a"),
+                    AST.IntType(),
+                ))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_type_1(self):
+        testcase = \
+"""Class Program {
+    Var a: Float;
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(
+                    AST.Id("a"),
+                    AST.FloatType(),
+                ))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_type_2(self):
+        testcase = \
+"""Class Program {
+    Var a: Boolean;
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(
+                    AST.Id("a"),
+                    AST.BoolType(),
+                ))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_type_3(self):
+        testcase = \
+"""Class Program {
+    Var a: String;
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(
+                    AST.Id("a"),
+                    AST.StringType(),
+                ))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_type_4(self):
+        testcase = \
+"""Class Program {
+    Var a: Array[Int, 2];
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(
+                    AST.Id("a"),
+                    AST.ArrayType(2, AST.IntType()),
+                ))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_type_5(self):
+        testcase = \
+"""Class Program {
+    Var a: Array[Array[Array[Int, 4], 3], 2];
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(
+                    AST.Id("a"),
+                    AST.ArrayType(2, AST.ArrayType(3, AST.ArrayType(4, AST.IntType()))),
+                ))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_type_6(self):
+        testcase = \
+"""Class Program {
+    Var a: Human;
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.AttributeDecl(AST.Instance(), AST.VarDecl(
+                    AST.Id("a"),
+                    AST.ClassType(AST.Id("Human")),
+                ))
+            ]),
+        ]))
+        self._test(testcase, expect)
+
