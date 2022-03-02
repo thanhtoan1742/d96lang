@@ -2175,3 +2175,164 @@ Class Program {
         self._test(testcase, expect)
 
 
+
+    # expression evaluation order
+    def test_exp_eval_order_0(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Return 1 + 2 * 3;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([AST.Return(
+                    AST.BinaryOp(
+                        "+",
+                        AST.IntLiteral(1),
+                        AST.BinaryOp(
+                            "*",
+                            AST.IntLiteral(2),
+                            AST.IntLiteral(3)
+                        )
+                    )
+                )])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_exp_eval_order_1(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Return 1 + 2 + 3;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([AST.Return(
+                    AST.BinaryOp(
+                        "+",
+                        AST.BinaryOp(
+                            "+",
+                            AST.IntLiteral(1),
+                            AST.IntLiteral(2)
+                        ),
+                        AST.IntLiteral(3),
+                    )
+                )])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_exp_eval_order_1(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Return 1 + 2 - 3 + 4;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([AST.Return(
+                    AST.BinaryOp(
+                        "+",
+                        AST.BinaryOp(
+                            "-",
+                            AST.BinaryOp(
+                                "+",
+                                AST.IntLiteral(1),
+                                AST.IntLiteral(2),
+                            ),
+                            AST.IntLiteral(3)
+                        ),
+                        AST.IntLiteral(4),
+                    )
+                )])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_exp_eval_order_2(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Return 1 + - 2;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([AST.Return(
+                    AST.BinaryOp(
+                        "+",
+                        AST.IntLiteral(1),
+                        AST.UnaryOp("-", AST.IntLiteral(2)),
+                    )
+                )])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_exp_eval_order_3(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Return Self.arr[1];
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([AST.Return(
+                    AST.ArrayCell(
+                        AST.FieldAccess(AST.SelfLiteral(), AST.Id("arr")),
+                        [AST.IntLiteral(1)]
+                    )
+                )])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_exp_eval_order_4(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Return Program::$arr[1];
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([AST.Return(
+                    AST.ArrayCell(
+                        AST.FieldAccess(AST.Id("Program"), AST.Id("$arr")),
+                        [AST.IntLiteral(1)]
+                    )
+                )])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+    def test_exp_eval_order_5(self):
+        testcase = \
+"""Class Program{
+    main() {
+        Return !True && !False || True;
+    }
+}"""
+        expect = str(AST.Program([
+            AST.ClassDecl(AST.Id("Program"), [
+                AST.MethodDecl(AST.Instance(), AST.Id("main"), [], AST.Block([AST.Return(
+                    AST.BinaryOp(
+                        "||",
+                        AST.BinaryOp(
+                            "&&",
+                            AST.UnaryOp("!", AST.BooleanLiteral(True)),
+                            AST.UnaryOp("!", AST.BooleanLiteral(False)),
+                        ),
+                        AST.BooleanLiteral(True),
+                    )
+                )])),
+            ]),
+        ]))
+        self._test(testcase, expect)
+
+
