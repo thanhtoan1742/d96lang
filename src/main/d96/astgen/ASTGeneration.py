@@ -408,7 +408,7 @@ class ASTGeneration(D96Visitor):
         if ctx.STR_LIT():
             return AST.StringLiteral(ctx.STR_LIT().getText())
         if ctx.BOOL_LIT():
-            return AST.BooleanLiteral(bool(ctx.BOOL_LIT().getText()))
+            return AST.BooleanLiteral(bool(ctx.BOOL_LIT().getText() == "True"))
         if ctx.NULL():
             return AST.NullLiteral()
         if ctx.SELF():
