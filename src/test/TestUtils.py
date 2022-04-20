@@ -11,10 +11,10 @@ from D96Lexer import D96Lexer
 from D96Parser import D96Parser
 from lexererr import *
 from ASTGeneration import ASTGeneration
-# from StaticCheck import StaticChecker
-# from StaticError import *
+from StaticCheck import StaticChecker
+from StaticError import *
 # from CodeGenerator import CodeGenerator
-# import subprocess
+import subprocess
 
 JASMIN_JAR = "./external/jasmin.jar"
 TEST_DIR = "./test/testcases/"
@@ -131,35 +131,35 @@ class TestAST:
         dest.write(str(asttree))
         dest.close()
 
-# class TestChecker:
-#     @staticmethod
-#     def test(input,expect,num):
-#         if type(input) is str:
-#             inputfile = TestUtil.makeSource(input,num)
-#             lexer = Lexer(inputfile)
-#             tokens = CommonTokenStream(lexer)
-#             parser = Parser(tokens)
-#             tree = parser.program()
-#             asttree = ASTGeneration().visit(tree)
-#         else:
-#             inputfile = TestUtil.makeSource(str(input),num)
-#             asttree = input
-#         TestChecker.check(SOL_DIR,asttree,num)
-#         dest = open(os.path.join(SOL_DIR, str(num) + ".txt"),"r")
-#         line = dest.read()
-#         return line == expect
+class TestChecker:
+    @staticmethod
+    def test(input,expect,num):
+        if type(input) is str:
+            inputfile = TestUtil.makeSource(input,num)
+            lexer = Lexer(inputfile)
+            tokens = CommonTokenStream(lexer)
+            parser = Parser(tokens)
+            tree = parser.program()
+            asttree = ASTGeneration().visit(tree)
+        else:
+            inputfile = TestUtil.makeSource(str(input),num)
+            asttree = input
+        TestChecker.check(SOL_DIR,asttree,num)
+        dest = open(os.path.join(SOL_DIR, str(num) + ".txt"),"r")
+        line = dest.read()
+        return line == expect
 
-#     @staticmethod
-#     def check(soldir,asttree,num):
-#         dest = open(os.path.join(soldir, str(num) + ".txt"),"w")
-#         checker = StaticChecker(asttree)
-#         try:
-#             res = checker.check()
-#             dest.write(str(list(res)))
-#         except StaticError as e:
-#             dest.write(str(e))
-#         finally:
-#             dest.close()
+    @staticmethod
+    def check(soldir,asttree,num):
+        dest = open(os.path.join(soldir, str(num) + ".txt"),"w")
+        checker = StaticChecker(asttree)
+        try:
+            res = checker.check()
+            dest.write(str(list(res)))
+        except StaticError as e:
+            dest.write(str(e))
+        finally:
+            dest.close()
 
 # class TestCodeGen():
 #     @staticmethod
