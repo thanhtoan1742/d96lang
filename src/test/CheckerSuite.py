@@ -1,52 +1,87 @@
 import unittest
 from TestUtils import TestChecker
-from AST import *
+import AST
+import StaticError as SE
 
+
+def write_wrong_answer(expect, num):
+    from pathlib import Path
+    Path('./test/WAs/').mkdir(parents=True, exist_ok=True)
+    path = './test/WAs/' + str(num) + '.txt'
+    with open(path, 'w+') as f:
+        testcase = open('./test/testcases/' + str(num) + '.txt').read()
+        solution = open('./test/solutions/' + str(num) + '.txt').read()
+        f.write('\n-----------------------------------TESTCASE----------------------------------\n')
+        f.write(testcase)
+        f.write('\n-----------------------------------EXPECT------------------------------------\n')
+        f.write(expect)
+        f.write('\n-----------------------------------GOT---------------------------------------\n')
+        f.write(solution)
 class CheckerSuite(unittest.TestCase):
-    def test_undeclared_function(self):
-        """Simple program: int main() {} """
-        input = """int main() {foo();}"""
-        expect = "Undeclared Function: foo"
-        self.assertTrue(TestChecker.test(input,expect,400))
+    def __init__(self, methodName: str = ...) -> None:
+        super().__init__(methodName=methodName)
+        CheckerSuite.counter = 1999
 
-    def test_diff_numofparam_stmt(self):
-        """More complex program"""
-        input = """int main () {
-            putIntLn();
-        }"""
-        expect = "Type Mismatch In Statement: CallExpr(Id(putIntLn),List())"
-        self.assertTrue(TestChecker.test(input,expect,401))
-    
-    def test_diff_numofparam_expr(self):
-        """More complex program"""
-        input = """int main () {
-            putIntLn(getInt(4));
-        }"""
-        expect = "Type Mismatch In Expression: CallExpr(Id(getInt),List(IntLiteral(4)))"
-        self.assertTrue(TestChecker.test(input,expect,402))
+    def _test(self, testcase, expect):
+        CheckerSuite.counter += 1
+        try:
+            self.assertTrue(TestChecker.test(testcase, expect, CheckerSuite.counter))
+        except AssertionError:
+            write_wrong_answer(expect, self.counter)
+            raise AssertionError(f"checker failed at test {CheckerSuite.counter}")
 
-    def test_undeclared_function_use_ast(self):
-        """Simple program: int main() {} """
-        input = Program([FuncDecl(Id("main"),[],IntType(),Block([],[
-            CallExpr(Id("foo"),[])]))])
-        expect = "Undeclared Function: foo"
-        self.assertTrue(TestChecker.test(input,expect,403))
+    # sample test from BKeL
+    def test_sample_0(self):
+        testcase = """
+Program(
+    [
+        ClassDecl(
+            Id("Program"),
+            [
+                MethodDecl(
+                    Static(),
+                    Id("main"),
+                    [],
+                    Block([])
+                ),
+                AttributeDecl(
+                    Instance(),
+                    VarDecl(
+                        Id("myVar"),
+                        StringType(),
+                        StringLiteral("Hello World")
+                    )
+                ),
+                AttributeDecl(
+                    Instance(),
+                    VarDecl(
+                        Id("myVar"),
+                        IntType()
+                    )
+                )
+            ]
+        )
+    ]
+)
+        """
+        expect = "Redeclared Attribute: myVar"
+        self._test(testcase, expect)
 
-    def test_diff_numofparam_expr_use_ast(self):
-        """More complex program"""
-        input = Program([
-                FuncDecl(Id("main"),[],IntType(),Block([],[
-                    CallExpr(Id("putIntLn"),[
-                        CallExpr(Id("getInt"),[IntLiteral(4)])
-                        ])]))])
-        expect = "Type Mismatch In Expression: CallExpr(Id(getInt),List(IntLiteral(4)))"
-        self.assertTrue(TestChecker.test(input,expect,404))
-
-    def test_diff_numofparam_stmt_use_ast(self):
-        """More complex program"""
-        input = Program([
-                FuncDecl(Id("main"),[],IntType(),Block([],[
-                    CallExpr(Id("putIntLn"),[])]))])
-        expect = "Type Mismatch In Statement: CallExpr(Id(putIntLn),List())"
-        self.assertTrue(TestChecker.test(input,expect,405))
-    
+    def test_entry_point_0(self):
+        testcase = """
+Program([
+    ClassDecl(
+        Id("Program"),
+        [
+            MethodDecl(
+                Static(),
+                Id("not_main"),
+                [],
+                Block([])
+            ),
+        ]
+    )
+])
+        """
+        expect = str(SE.NoEntryPoint())
+        self._test(testcase, expect)
