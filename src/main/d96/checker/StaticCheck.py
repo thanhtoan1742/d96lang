@@ -1,38 +1,94 @@
+from copy import deepcopy
+from abc import ABC
+from typing import List
 
 import AST
 from Visitor import *
-from Utils import Utils
-from StaticError import *
-from dataclasses import dataclass
+import StaticError as SE
 
 """
 what happens when a method returns multiple time and the return types are diffrent?
+-> TypeMismatchError
 what happens when a method is a recursive loop with no end point?
 """
 
 
-@dataclass
 class MethodDeclRet(AST.MethodDecl):
-    retType: AST.Type = AST.VoidType()
+    def __init__(self, retType: AST.Type = AST.VoidType(), *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.retType = retType
 
 
+class Symbol(ABC):
+    """
+    Symbol(name, kind):
+    ClassSymbol()
+    MethodSymbol(statically_evaluable, param_types, ret_type)
+    ValueSymbol(is_constant, type):
+        VariableSymbol()
+        ConstantSymbol()
+        AttributeSymbol()
+        ParameterSymbol()
 
-class MType:
-    def __init__(self, partype, rettype):
-        self.partype = partype
-        self.rettype = rettype
+    store all kind of symbol: class, variable, const, method,...
+    kind: StaticError's kind
+    type: if kind is variable or constant, this is the type.
+    If kind is function, this is an array of [return type, params' type].
+    store_kind: 'val' | 'var' | None
+    """
 
+    kind: SE.Kind
 
-class Symbol:
-    def __init__(self, name, mtype, value=None):
+    def __init__(self, name: str) -> None:
         self.name = name
+
+
+class ValueSymbol(Symbol):
+    def __init__(self, name: str, is_constant: bool, mtype: AST.Type) -> None:
+        super().__init__(name)
+        self.is_constant = is_constant
         self.mtype = mtype
-        self.value = value
+
+
+class VariableSymbol(ValueSymbol):
+    kind = SE.Variable()
+
+
+class AttributeSymbol(ValueSymbol):
+    kind = SE.Attribute()
+
+
+class ParameterSymbol(ValueSymbol):
+    kind = SE.Parameter()
+
+
+class ConstantSymbol(ValueSymbol):
+    kind = SE.Constant()
+
+
+class ClassSymbol(Symbol):
+    kind = SE.Class()
+
+
+class MethodSymbol(Symbol):
+    kind = SE.Method()
+
+    def __init__(
+        self, name: str,
+        statically_evaluable: bool,
+        param_types: List[AST.Type],
+        ret_type: AST.Type
+    ) -> None:
+        super().__init__(name)
+        self.statically_evaluable = statically_evaluable
+        self.param_types = param_types
+        self.ret_types = ret_type
 
 
 class SymbolPool:
     def __init__(self) -> None:
         self.scope = 0
+        self.pools = {}
         self.pools[self.scope] = {}
 
     def inc_scope(self):
@@ -43,176 +99,49 @@ class SymbolPool:
         self.pools.pop(self.scope)
         self.scope -= 1
 
-    def is_declared_in_current_scope(self, id):
-        return id in self.pools[self.scope]
+    def is_declared_in_current_scope(self, name):
+        return name in self.pools[self.scope]
 
-    def get_symbol(self, id):
+    def add_symbol(self, sym: Symbol):
+        self.pools[self.scope][sym.name] = sym
+
+    def get_symbol(self, name):
         for s in range(self.scope, -1, -1):
-            if id in self.pools[s]:
-                return self.pools[s][id]
+            if name in self.pools[s]:
+                return self.pools[s][name]
         return None
 
 
+def clone_ast(ast):
+    "deep copy the ast"
+    return ast
 
 
-class StaticChecker(BaseVisitor, Utils):
-    def __init__(self, ast):
-        self.ast = ast
+# The static checker should starting checking at AST.Program, otherwise
+# it will produce undefined behavior.
+class StaticChecker(BaseVisitor):
+    def __init__(self, ast: AST.AST):
+        self.ast = clone_ast(ast)
 
     def check(self):
-        ast = FirstPassChecker().visit(self.ast, {})
-        SecondPassChecker().visit(ast, {})
+        return self.visit(self.ast, {})
 
-
-# visit the given AST then return a new AST where all type a resolved.
-# do some memantic check also
-class FirstPassChecker(BaseVisitor, Utils):
-    def visitAST(self, ctx, visit_params):
+    def visitClassDecl(self, ast: AST.ClassDecl, visit_param: dict):
         pass
 
-    def visitInst(self, ctx, visit_params):
-        pass
+    def visitProgram(self, ast: AST.Program, visit_param: dict):
+        for d in ast.decl:
+            self.visit(d, visit_param)
 
-    def visitStmt(self, ctx, visit_params):
-        pass
-
-    def visitExpr(self, ctx, visit_params):
-        pass
-
-    def visitLHS(self, ctx, visit_params):
-        pass
-
-    def visitType(self, ctx, visit_params):
-        pass
-
-    def visitMemDecl(self, ctx, visit_params):
-        pass
-
-    def visitId(self, ctx, visit_params):
-        pass
-
-    def visitBinaryOp(self, ctx, visit_params):
-        pass
-
-    def visitUnaryOp(self, ctx, visit_params):
-        pass
-
-    def visitCallExpr(self, ctx, visit_params):
-        pass
-
-    def visitNewExpr(self, ctx, visit_params):
-        pass
-
-    def visitArrayCell(self, ctx, visit_params):
-        pass
-
-    def visitFieldAccess(self, ctx, visit_params):
-        pass
-
-    def visitLiteral(self, ctx, visit_params):
-        pass
-
-    def visitIntLiteral(self, ctx, visit_params):
-        pass
-
-    def visitFloatLiteral(self, ctx, visit_params):
-        pass
-
-    def visitStringLiteral(self, ctx, visit_params):
-        pass
-
-    def visitBooleanLiteral(self, ctx, visit_params):
-        pass
-
-    def visitNullLiteral(self, ctx, visit_params):
-        pass
-
-    def visitSelfLiteral(self, ctx, visit_params):
-        pass
-
-    def visitArrayLiteral(self, ctx, visit_params):
-        pass
-
-    def visitDecl(self, ctx, visit_params):
-        pass
-
-    def visitStoreDecl(self, ctx, visit_params):
-        pass
-
-    def visitAssign(self, ctx, visit_params):
-        pass
-
-    def visitIf(self, ctx, visit_params):
-        pass
-
-    def visitFor(self, ctx, visit_params):
-        pass
-
-    def visitBreak(self, ctx, visit_params):
-        pass
-
-    def visitContinue(self, ctx, visit_params):
-        pass
-
-    def visitReturn(self, ctx, visit_params):
-        pass
-
-    def visitCallStmt(self, ctx, visit_params):
-        pass
-
-    def visitVarDecl(self, ctx, visit_params):
-        pass
-
-    def visitBlock(self, ctx, visit_params):
-        pass
-
-    def visitConstDecl(self, ctx, visit_params):
-        pass
-
-    def visitClassDecl(self, ctx, visit_params):
-        pass
-
-    def visitSIKind(self, ctx, visit_params):
-        pass
-
-    def visitInstance(self, ctx, visit_params):
-        pass
-
-    def visitStatic(self, ctx, visit_params):
-        pass
-
-    def visitMethodDecl(self, ctx, visit_params):
-        pass
-
-    def visitAttributeDecl(self, ctx, visit_params):
-        pass
-
-    def visitIntType(self, ctx, visit_params):
-        pass
-
-    def visitFloatType(self, ctx, visit_params):
-        pass
-
-    def visitBoolType(self, ctx, visit_params):
-        pass
-
-    def visitStringType(self, ctx, visit_params):
-        pass
-
-    def visitArrayType(self, ctx, visit_params):
-        pass
-
-    def visitClassType(self, ctx, visit_params):
-        pass
-
-    def visitVoidType(self, ctx, visit_params):
-        pass
-
-    def visitProgram(self, ctx, visit_params):
-        for d in ctx.decl:
-            self.visit(d, visit_params)
-
-
-
-class SecondPassChecker(BaseVisitor, Utils):
-    pass
+        found_entry = False
+        for c in ast.decl:
+            if c.classname == 'Program':
+                for m in c.memlist:
+                    if isinstance(m, MethodDeclRet) \
+                    and m.name == 'main' \
+                    and m.param == [] \
+                    and m.retType == AST.VoidType():
+                        found_entry = True
+                        break
+        if not found_entry:
+            raise SE.NoEntryPoint()

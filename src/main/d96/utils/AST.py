@@ -197,7 +197,7 @@ class If(Stmt):
 class For(Stmt):
     id: Id
     expr1: Expr
-    expr2: Expr 
+    expr2: Expr
     loop: Stmt
     expr3: Expr = None
 
