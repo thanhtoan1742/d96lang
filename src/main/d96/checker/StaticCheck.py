@@ -19,21 +19,23 @@ Inheritance?
 -> No inheritance
 
 
-Class Program{
-    Val f: int = 10;
-    f(){}
+Class A {
+    Val $s: Int = 10;
 }
-This is ok.
 
-Class Program{
-    Val $someStatic : Int = 10;
+Class Program {
     main() {
-        Var Program : Float = 1.0;
-        Var x : Int = Program::$someStatic; // ***
-   }
+        Val x: Int;
+        Var A: A = new A();
+        x = A::$A;
+        x = A.$s.
+    }
 }
-this is ok too.
 
+notId Id
+Id Id ->
+Id $Id -> static
+notId $Id // never, illegal
 """
 
 class Symbol(ABC):
@@ -262,16 +264,14 @@ def coercible(t1: AST.Type, t2: AST.Type) -> bool:
 
     Array has to be exactly the same.
     IntType can be coerced into  FloatType.
-    ClassType check using class hierarchy (for now,
-    only check if name is the same or t2 is Object).
+    ClassType check for name.
     """
     if type(t1) == AST.ArrayType and type(t2) == AST.ArrayType:
         return t1.size == t2.size and coercible(t1.eleType, t2.eleType)
     if type(t1) == AST.IntType and type(t2) == AST.FloatType:
         return True
     if type(t1) == AST.ClassType and type(t2) == AST.ClassType:
-        # TODO: check class hierarchy here
-        return t2.classname.name == 'Object' or t1.classname.name == t2.classname.name
+        return t1.classname == None or t1.classname.name == t2.classname.name
     if type(t1) == type(t2):
         return True
     return False
@@ -328,6 +328,7 @@ class StaticChecker(BaseVisitor):
             sym = self.pool.get_symbol(e, SE.Variable())
             if not sym:
                 raise SE.Undeclared(SE.Identifier(), e)
+            return sym
         return e
 
     def check_assign_args_to_param(self, args: List[AST.Expr], param_types: List[AST.Type], visit_param: dict) -> bool:
@@ -350,7 +351,7 @@ class StaticChecker(BaseVisitor):
 
         If accessing/calling an instance attribute/method using static syntax
         or accessing/calling a static attribute/method using instance syntax,
-        raise TypeMismatch.
+        raise IllegalMemberAccess.
 
         If method or attribute not found, raise Undeclared.
         """
@@ -360,16 +361,37 @@ class StaticChecker(BaseVisitor):
         else:
             name: str = self.visit(ast.method)
             kind = SE.Method()
+        if type(ast) == AST.CallStmt:
+            exception = SE.TypeMismatchInStatement(ast)
+        else:
+            exception = SE.TypeMismatchInExpression(ast)
+
+
+        has_class = False
+        has_instance = False
+        if type(ast.obj) == AST.Id:
+            csn = self.visit(ast.obj, visit_param)
+            has_class = self.pool.get_symbol(csn, SE.Class()) != None
+            sym: ValueSymbol = self.pool.get_symbol(csn, SE.Variable())
+            has_instance = sym and type(sym.mtype) == AST.ClassType
+        else:
+            sym: ValueSymbol = self.visit_expr(ast.obj, visit_param)
+            has_instance = sym and type(sym.mtype) == AST.ClassType
 
         if name.startswith('$'):
-            if type(ast.obj) != AST.Id:
+            if has_class:
+                class_name = csn
+            elif has_instance:
                 raise SE.IllegalMemberAccess(ast)
-            class_name: str = self.visit(ast.obj, visit_param)
+            else:
+                raise exception
         else:
-            obj: ValueSymbol = self.visit(ast.obj, visit_param)
-            if type(obj.mtype) != AST.ClassType:
+            if has_instance:
+                class_name = sym.mtype.classname.name
+            elif has_class:
                 raise SE.IllegalMemberAccess(ast)
-            class_name: str = self.visit(obj.mtype.classname, visit_param)
+            else:
+                raise exception
 
         sym = self.pool.get_symbol(name, kind, class_name)
         if not sym:
@@ -393,9 +415,9 @@ class StaticChecker(BaseVisitor):
 
     def visitNullLiteral(self, ast: AST.NullLiteral, visit_param: dict) -> ValueSymbol:
         """
-        Object is the root of all types. Null is this type.
+        Class type of None (special marking).
         """
-        return ValueSymbol(None, True, AST.ClassType(AST.Id('Object')))
+        return ValueSymbol(None, True, AST.ClassType(None))
 
     def visitSelfLiteral(self, ast: AST.SelfLiteral, visit_param: dict) -> ValueSymbol:
         """
@@ -412,8 +434,8 @@ class StaticChecker(BaseVisitor):
         TEST: array elements are not constant.
         """
         size = len(ast.value)
-        if not size:
-            raise SE.IllegalArrayLiteral(ast)
+        # if not size:
+        #     raise SE.IllegalArrayLiteral(ast)
 
         eles: List[ValueSymbol] = [self.visit_expr(e) for e in ast.value]
         ele_type = eles[0].mtype
@@ -421,7 +443,7 @@ class StaticChecker(BaseVisitor):
         if not reduce(lambda acc, e: acc and type(e.mtype) == type(ele_type), eles):
             raise SE.IllegalArrayLiteral(ast)
         if not reduce(lambda acc, e: acc and e.is_constant, eles):
-            raise SE.IllegalArrayLiteral(ast)
+            raise SE.IllegalConstantExpression(ast)
         mtype = AST.ArrayType(size, ele_type)
         return ValueSymbol(None, True, mtype)
 
@@ -480,7 +502,10 @@ class StaticChecker(BaseVisitor):
         class_name: str = self.visit(ast.classname, visit_param)
         if not self.pool.get_symbol(class_name, SE.Class()):
             raise SE.Undeclared(SE.Class(), class_name)
-        # TODO: call constructor
+        constructor: MethodSymbol = self.pool.get_symbol('Constructor', SE.Method(), class_name)
+        assert constructor, f'Constructor not found for class {class_name}'
+        if not self.check_assign_args_to_param(ast.param, constructor.param_types, visit_param):
+            raise SE.TypeMismatchInExpression(ast)
         return ValueSymbol(None, False, AST.ClassType(ast.classname))
 
     def visitArrayCell(self, ast: AST.ArrayCell, visit_param: dict) -> ValueSymbol:
@@ -491,20 +516,24 @@ class StaticChecker(BaseVisitor):
 
         TEST: arr must be array type.
         TEST: indexes must be int type.
-        TEST: index out of bound.
-        TEST: dimension out of bound?
+        TEST: index out of bound. // don't check
+        TEST: dimension out of bound? // don't check
+
+        This works with 1-D array.
         """
         idxs = [self.visit_expr(e, visit_param) for e in ast.idx]
         if not reduce(lambda acc, v: acc and type(v.mtype) == AST.IntType, idxs):
             raise SE.TypeMismatchInExpression(ast)
 
         arr: ValueSymbol = self.visit_expr(ast.arr, visit_param)
-        if type(arr.mtype) != AST.ArrayType:
-            raise SE.TypeMismatchInExpression(ast)
+        mtype = arr.mtype
+        for _ in range(len(idxs)):
+            if type(mtype) != AST.ArrayType:
+                raise SE.TypeMismatchInExpression(ast)
+            mtype = mtype.eleType
 
         is_constant = reduce(lambda acc, id: acc and id.is_constant, idxs, arr.is_constant)
-        return ValueSymbol(None, is_constant, arr.mtype.eleType)
-
+        return ValueSymbol(None, is_constant, mtype)
 
     def visitCallExpr(self, ast: AST.CallExpr, visit_param: dict) -> ValueSymbol:
         """
@@ -527,19 +556,27 @@ class StaticChecker(BaseVisitor):
 
     def visitVarDecl(self, ast: AST.VarDecl, visit_param: dict) -> ValueSymbol:
         name: str = self.visit(ast.variable, visit_param)
+        if ast.varInit:
+            value = self.visit_expr(ast.varInit, visit_param)
+            if not coercible(value.mtype, ast.varType):
+                raise SE.TypeMismatchInStatement(ast)
+
         return ValueSymbol(name, False, ast.varType)
 
     def visitConstDecl(self, ast: AST.ConstDecl, visit_param: dict) -> ValueSymbol:
         """
         TEST: const value type is nor coercible to const type.
         TEST: value is not constant.
+        TEST: no init value.
         """
         name: str = self.visit(ast.constant, visit_param)
+        if not value:
+            raise SE.IllegalConstantExpression(ast.value)
         value = self.visit_expr(ast.value, visit_param)
-        if type(ast.constType) == AST.VoidType or not coercible(value.mtype, ast.constType):
-            raise SE.TypeMismatchInConstant(ast)
         if not value.is_constant:
             raise SE.IllegalConstantExpression(ast.value)
+        if type(ast.constType) == AST.VoidType or not coercible(value.mtype, ast.constType):
+            raise SE.TypeMismatchInConstant(ast)
         return ValueSymbol(name, True, ast.constType)
 
     def visitAttributeDecl(self, ast: AST.AttributeDecl, visit_param: dict) -> None:
@@ -574,15 +611,12 @@ class StaticChecker(BaseVisitor):
         TEST: lsh is not of type LHS.
         TEST: in for loop.
         """
-
-        lhs: ValueSymbol = self.visit_expr(ast.lhs, visit_param)
         rhs: ValueSymbol = self.visit_expr(ast.rhs, visit_param)
-        if lhs.is_constant:
-            raise SE.CannotAssignToConstant(ast)
+        lhs: ValueSymbol = self.visit_expr(ast.lhs, visit_param)
         if type(lhs.mtype) == AST.VoidType or not coercible(rhs.mtype, lhs.mtype):
             raise SE.TypeMismatchInStatement(ast)
-
-
+        if lhs.is_constant:
+            raise SE.CannotAssignToConstant(ast)
 
     def visitIf(self, ast: AST.If, visit_param: dict) -> None:
         """
@@ -648,7 +682,7 @@ class StaticChecker(BaseVisitor):
             self.context.class_name,
         )
         assert sym, 'return is not in a method'
-        if sym.ret_type and sym.ret_type != expr.mtype:
+        if sym.ret_type and not coercible(expr.mtype, sym.ret_type):
             raise SE.TypeMismatchInStatement(ast)
         sym.ret_type = expr.mtype
         sym.is_constant = expr.is_constant
@@ -718,8 +752,7 @@ class StaticChecker(BaseVisitor):
             name=name,
             class_name=self.context.class_name,
             is_static=isinstance(ast.kind, AST.Instance),
-            # no method can be constant (for now).
-            is_constant=False,
+            is_constant=True,
             param_types=[e.varType for e in ast.param],
             ret_type=ret_type
         )
@@ -801,3 +834,4 @@ class StaticChecker(BaseVisitor):
         entry_point: MethodSymbol = self.pool.get_symbol('main', SE.Method(), 'Program')
         if not entry_point or entry_point.param_types != []:
             raise SE.NoEntryPoint()
+
