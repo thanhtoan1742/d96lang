@@ -112,7 +112,7 @@ class MethodSymbol(ClassMemberSymbol):
         class_name: str,
         is_static: bool,
         is_constant: bool,
-        param_types: list[AST.Type],
+        param_types: List[AST.Type],
         ret_type: AST.Type = None
     ) -> None:
         super().__init__(name, class_name, is_static)
@@ -124,9 +124,12 @@ class MethodSymbol(ClassMemberSymbol):
 class AttributeSymbol(ClassMemberSymbol, ValueSymbol):
     kind = SE.Attribute()
 
-    def __init__(self, name: str, class_name:str , is_static: bool, is_constant: bool, mtype: AST.Type) -> None:
-        ClassMemberSymbol.__init__(self, class_name, is_static)
-        ValueSymbol.__init__(self, name, is_constant, mtype)
+    def __init__(self, name: str, class_name: str , is_static: bool, is_constant: bool, mtype: AST.Type) -> None:
+        self.name = name
+        self.class_name = class_name
+        self.is_static = is_static
+        self.is_constant = is_constant
+        self.mtype = mtype
 
 
 
@@ -178,6 +181,8 @@ class SymbolPool:
 
         if isinstance(sym, ClassSymbol):
             self.class_pool[sym.name] = sym
+            self.method_pool[sym.name] = {}
+            self.attribute_pool[sym.name] = {}
         elif isinstance(sym, MethodSymbol):
             self.method_pool[sym.class_name][sym.name] = sym
         elif isinstance(sym, AttributeSymbol):
@@ -344,7 +349,8 @@ class StaticChecker(BaseVisitor):
                 return False
         return True
 
-    def visit_class_member(self, ast: AST.CallExpr | AST.CallStmt | AST.FieldAccess, visit_param: dict) -> MethodSymbol | AttributeSymbol:
+    # def visit_class_member(self, ast: AST.CallExpr | AST.CallStmt | AST.FieldAccess, visit_param: dict) -> MethodSymbol | AttributeSymbol:
+    def visit_class_member(self, ast, visit_param: dict):
         """
         Try to get a MethodSymbol for CallExpr, CallStmt.
         Try to get a AttributeSymbol for FieldAccess.
@@ -570,9 +576,9 @@ class StaticChecker(BaseVisitor):
         TEST: no init value.
         """
         name: str = self.visit(ast.constant, visit_param)
+        value = self.visit_expr(ast.value, visit_param)
         if not value:
             raise SE.IllegalConstantExpression(ast.value)
-        value = self.visit_expr(ast.value, visit_param)
         if not value.is_constant:
             raise SE.IllegalConstantExpression(ast.value)
         if type(ast.constType) == AST.VoidType or not coercible(value.mtype, ast.constType):
@@ -611,7 +617,7 @@ class StaticChecker(BaseVisitor):
         TEST: lsh is not of type LHS.
         TEST: in for loop.
         """
-        rhs: ValueSymbol = self.visit_expr(ast.rhs, visit_param)
+        rhs: ValueSymbol = self.visit_expr(ast.exp, visit_param)
         lhs: ValueSymbol = self.visit_expr(ast.lhs, visit_param)
         if type(lhs.mtype) == AST.VoidType or not coercible(rhs.mtype, lhs.mtype):
             raise SE.TypeMismatchInStatement(ast)
@@ -778,9 +784,12 @@ class StaticChecker(BaseVisitor):
         TEST: parent class is not defined.
         """
         name: str = self.visit(ast.classname, visit_param)
-        parent: str = self.visit(ast.parentname, visit_param)
-        if not self.pool.is_declared(ClassSymbol(parent)):
-            raise SE.Undeclared(SE.Class(), parent)
+        if ast.parentname:
+            parent: str = self.visit(ast.parentname, visit_param)
+            if not self.pool.is_declared(ClassSymbol(parent)):
+                raise SE.Undeclared(SE.Class(), parent)
+        else:
+            parent = None
 
         sym = ClassSymbol(name, parent)
         self.pool.add_symbol(sym)

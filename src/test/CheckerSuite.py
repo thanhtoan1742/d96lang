@@ -1,7 +1,7 @@
 import unittest
 from TestUtils import TestChecker
-import AST
 import StaticError as SE
+from AST import *
 
 
 def write_wrong_answer(expect, num):
@@ -17,10 +17,12 @@ def write_wrong_answer(expect, num):
         f.write(expect)
         f.write('\n-----------------------------------GOT---------------------------------------\n')
         f.write(solution)
+
+
 class CheckerSuite(unittest.TestCase):
     def __init__(self, methodName: str = ...) -> None:
         super().__init__(methodName=methodName)
-        CheckerSuite.counter = 1999
+        CheckerSuite.counter = 3999
 
     def _test(self, testcase, expect):
         CheckerSuite.counter += 1
@@ -32,7 +34,7 @@ class CheckerSuite(unittest.TestCase):
 
     # sample test from BKeL
     def test_sample_0(self):
-        testcase = """
+        testcase = \
 Program(
     [
         ClassDecl(
@@ -63,12 +65,121 @@ Program(
         )
     ]
 )
-        """
         expect = "Redeclared Attribute: myVar"
         self._test(testcase, expect)
 
+    def test_sample_1(self):
+        testcase = \
+Program(
+    [
+        ClassDecl(
+            Id("Program"),
+            [
+                MethodDecl(
+                    Static(),
+                    Id("main"),
+                    [],
+                    Block(
+                        [
+                            Assign(
+                                Id("myVar"),
+                                IntLiteral(10)
+                            )
+                        ]
+                    )
+                )
+            ]
+        )
+    ]
+)
+        expect = "Undeclared Identifier: myVar"
+        self._test(testcase, expect)
+
+    def test_sample_2(self):
+        testcase = \
+Program(
+    [
+        ClassDecl(
+            Id("Program"),
+            [
+                MethodDecl(
+                    Static(),
+                    Id("main"),
+                    [],
+                    Block([
+                        ConstDecl(
+                            Id("myVar"),
+                            IntType(),
+                            IntLiteral(5)
+                        ),
+                        Assign(
+                            Id("myVar"),
+                            IntLiteral(10)
+                        )]
+                    )
+                )
+            ]
+        )
+    ]
+)
+        expect = "Cannot Assign To Constant: AssignStmt(Id(myVar),IntLit(10))"
+        self._test(testcase, expect)
+
+    def test_sample_3(self):
+        testcase = \
+Program(
+    [
+        ClassDecl(
+            Id("Program"),
+            [
+                MethodDecl(
+                    Static(),
+                    Id("main"),
+                    [],
+                    Block(
+                        [
+                            Break()
+                        ]
+                    )
+                )
+            ]
+        )
+    ]
+)
+        expect = "Break Not In Loop"
+        self._test(testcase, expect)
+
+    def test_sample_4(self):
+        testcase = \
+Program(
+    [
+        ClassDecl(
+            Id("Program"),
+            [
+                MethodDecl(
+                    Static(),
+                    Id("main"),
+                    [],
+                    Block(
+                        [
+                            ConstDecl(
+                                Id("myVar"),
+                                IntType(),
+                                FloatLiteral(1.2)
+                            )
+                        ]
+                    )
+                )
+            ]
+        )
+    ]
+)
+        expect = "Type Mismatch In Constant Declaration: ConstDecl(Id(myVar),IntType,FloatLit(1.2))"
+        self._test(testcase, expect)
+
+
     def test_entry_point_0(self):
-        testcase = """
+        testcase = \
 Program([
     ClassDecl(
         Id("Program"),
@@ -82,6 +193,5 @@ Program([
         ]
     )
 ])
-        """
         expect = str(SE.NoEntryPoint())
         self._test(testcase, expect)
