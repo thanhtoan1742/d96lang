@@ -178,6 +178,192 @@ Program(
         self._test(testcase, expect)
 
 
+
+
+
+
+    def test_array_literal_0(self):
+        testcase = \
+Program([
+    ClassDecl(
+        Id("Program"),
+        [
+            MethodDecl(
+                Static(),
+                Id("main"),
+                [],
+                Block([
+                    VarDecl(
+                        Id("a"),
+                        ArrayType(3, IntType()),
+                        ArrayLiteral([
+                            IntLiteral(0),
+                            IntLiteral(1),
+                            FloatLiteral(1),
+                        ])
+                    )
+                ])
+            )
+        ]
+    )
+])
+        expect = str(SE.IllegalArrayLiteral(
+            ArrayLiteral([
+                IntLiteral(0),
+                IntLiteral(1),
+                FloatLiteral(1),
+            ])
+        ))
+        self._test(testcase, expect)
+
+    def test_array_literal_1(self):
+        array_literal = ArrayLiteral([
+            ArrayLiteral([IntLiteral(0), IntLiteral(1), IntLiteral(2)]),
+            ArrayLiteral([IntLiteral(3), IntLiteral(4), IntLiteral(5)]),
+            ArrayLiteral([IntLiteral(6), IntLiteral(7)]),
+        ])
+        testcase = \
+Program([
+    ClassDecl(
+        Id("Program"),
+        [
+            MethodDecl(
+                Static(),
+                Id("main"),
+                [],
+                Block([
+                    VarDecl(
+                        Id("a"),
+                        ArrayType(3, ArrayType(3, IntType())),
+                        array_literal
+                    )
+                ])
+            )
+        ]
+    )
+])
+        expect = str(SE.IllegalArrayLiteral(array_literal))
+        self._test(testcase, expect)
+
+    def test_array_literal_2(self):
+        array_literal = ArrayLiteral([
+            ArrayLiteral([IntLiteral(0), IntLiteral(1), IntLiteral(2)]),
+            ArrayLiteral([IntLiteral(3), IntLiteral(4), IntLiteral(5)]),
+            ArrayLiteral([IntLiteral(6), IntLiteral(7), Id("x")]),
+        ])
+        testcase = \
+Program([
+    ClassDecl(
+        Id("Program"),
+        [
+            MethodDecl(
+                Static(),
+                Id("main"),
+                [],
+                Block([
+                    VarDecl(Id("x"), FloatType(), FloatLiteral(8)),
+                    VarDecl(
+                        Id("a"),
+                        ArrayType(3, ArrayType(3, IntType())),
+                        array_literal
+                    )
+                ])
+            )
+        ]
+    )
+])
+        expect = str(SE.IllegalArrayLiteral(array_literal))
+        self._test(testcase, expect)
+
+    def test_array_literal_3(self):
+        array_literal = ArrayLiteral([IntLiteral(6), IntLiteral(7), Id("x")])
+        testcase = \
+Program([
+    ClassDecl(
+        Id("Program"),
+        [
+            MethodDecl(
+                Static(),
+                Id("main"),
+                [],
+                Block([
+                    VarDecl(Id("x"), FloatType(), FloatLiteral(8)),
+                    VarDecl(Id("a"), ArrayType(3, IntType()), array_literal)
+                ])
+            )
+        ]
+    )
+])
+        expect = str(SE.IllegalArrayLiteral(array_literal))
+        self._test(testcase, expect)
+
+    def test_array_literal_4(self):
+        array_literal = ArrayLiteral([
+            NewExpr(Id("A"), []),
+            NewExpr(Id("B"), []),
+            NewExpr(Id("A"), []),
+        ])
+        testcase = \
+Program([
+    ClassDecl(Id('A'), []),
+    ClassDecl(Id('B'), []),
+    ClassDecl(
+        Id("Program"),
+        [
+            MethodDecl(
+                Static(),
+                Id("main"),
+                [],
+                Block([
+                    VarDecl(Id("a"), ArrayType(3, ClassType(Id("A"))), array_literal)
+                ])
+            )
+        ]
+    )
+])
+        expect = str(SE.IllegalArrayLiteral(array_literal))
+        self._test(testcase, expect)
+
+
+    def test_type_coercion_0(self):
+        stmt = VarDecl(
+            Id("a"),
+            ArrayType(3, FloatType()),
+            ArrayLiteral([FloatLiteral(0), FloatLiteral(1)])
+        )
+        testcase = \
+Program([
+    ClassDecl(
+        Id("Program"),
+        [
+            MethodDecl(
+                Static(),
+                Id("main"),
+                [],
+                Block([stmt])
+            )
+        ]
+    )
+])
+        expect = str(SE.TypeMismatchInStatement(stmt))
+        self._test(testcase, expect)
+
+
+
+    def test_class_decl_0(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), [], Id("B")),
+    ClassDecl(Id("Program"), [MethodDecl(Static(), Id("main"), [], Block([])),]),
+])
+        expect = str(SE.Undeclared(SE.Class(), "B"))
+        self._test(testcase, expect)
+
+
+
+
+
+
     def test_entry_point_0(self):
         testcase = \
 Program([
@@ -188,6 +374,35 @@ Program([
                 Static(),
                 Id("not_main"),
                 [],
+                Block([])
+            ),
+        ]
+    )
+])
+        expect = str(SE.NoEntryPoint())
+        self._test(testcase, expect)
+
+    def test_entry_point_1(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+])
+        expect = str(SE.NoEntryPoint())
+        self._test(testcase, expect)
+
+
+    def test_entry_point_2(self):
+        testcase = \
+Program([
+    ClassDecl(
+        Id("Program"),
+        [
+            MethodDecl(
+                Static(),
+                Id("main"),
+                [
+                    VarDecl(Id("a"), IntType()),
+                ],
                 Block([])
             ),
         ]

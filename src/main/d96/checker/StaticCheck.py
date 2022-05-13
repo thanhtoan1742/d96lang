@@ -212,10 +212,12 @@ class SymbolPool:
         if isinstance(kind, SE.Class):
             return self.class_pool.get(name, None)
         elif isinstance(kind, SE.Method):
-            assert class_name != None
+            if not class_name in self.method_pool:
+                return None
             return self.method_pool[class_name].get(name, None)
         elif isinstance(kind, SE.Attribute):
-            assert class_name != None
+            if not class_name in self.attribute_pool:
+                return None
             return self.attribute_pool[class_name].get(name, None)
         else:
             for s in range(self.scope, -1, -1):
@@ -277,6 +279,20 @@ def coercible(t1: AST.Type, t2: AST.Type) -> bool:
         return True
     if type(t1) == AST.ClassType and type(t2) == AST.ClassType:
         return t1.classname == None or t1.classname.name == t2.classname.name
+    if type(t1) == type(t2):
+        return True
+    return False
+
+def typeis(t1: AST.Type, t2: AST.Type) -> bool:
+    """
+    Return true if t1 is t2 (exactly, not coerced).
+    """
+    if type(t1) == AST.ArrayType and type(t2) == AST.ArrayType:
+        return t1.size == t2.size and typeis(t1.eleType, t2.eleType)
+    if type(t1) == AST.IntType and type(t2) == AST.FloatType:
+        return True
+    if type(t1) == AST.ClassType and type(t2) == AST.ClassType:
+        return t1.classname.name == t2.classname.name
     if type(t1) == type(t2):
         return True
     return False
@@ -436,22 +452,19 @@ class StaticChecker(BaseVisitor):
         All elements in array must have the same type
 
         TEST: elements in array do not have the same type.
-        TEST: array size = 0.
-        TEST: array elements are not constant.
         """
         size = len(ast.value)
         # if not size:
         #     raise SE.IllegalArrayLiteral(ast)
 
-        eles: List[ValueSymbol] = [self.visit_expr(e) for e in ast.value]
+        eles: List[ValueSymbol] = [self.visit_expr(e, visit_param) for e in ast.value]
         ele_type = eles[0].mtype
         # type has to be the same, not coercible.
-        if not reduce(lambda acc, e: acc and type(e.mtype) == type(ele_type), eles):
+        if not reduce(lambda acc, e: acc and typeis(e.mtype, ele_type), eles):
             raise SE.IllegalArrayLiteral(ast)
-        if not reduce(lambda acc, e: acc and e.is_constant, eles):
-            raise SE.IllegalConstantExpression(ast)
+        is_constant = reduce(lambda acc, e: acc and e.is_constant, eles)
         mtype = AST.ArrayType(size, ele_type)
-        return ValueSymbol(None, True, mtype)
+        return ValueSymbol(None, is_constant, mtype)
 
 
     def visitId(self, ast: AST.Id, visit_param: dict) -> str:
@@ -780,7 +793,6 @@ class StaticChecker(BaseVisitor):
         If there is no constructor, generate empty constructor.
         If there is no destructor, generate empty destructor.
 
-        TEST: call a method defined in parent using child class.
         TEST: parent class is not defined.
         """
         name: str = self.visit(ast.classname, visit_param)
@@ -824,10 +836,8 @@ class StaticChecker(BaseVisitor):
         """
         TEST: no Program class.
         TEST: no main method.
-        TEST: main method is not static.
         TEST: main method accepts parameters.
         TEST: main method return something (not void).
-        TEST: main method can be static or not.
 
         from BKeL
         [Error raised for function "main" in class Program]
