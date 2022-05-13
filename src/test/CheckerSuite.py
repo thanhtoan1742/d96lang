@@ -203,6 +203,127 @@ Program([
         self._test(testcase, expect)
 
 
+    def test_int_lit_0(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                ConstDecl(Id("x"), IntType(), IntLiteral(1)),
+                Break(),
+            ])),
+        ])
+])
+        expect = str(SE.MustInLoop(Break()))
+        self._test(testcase, expect)
+
+    def test_float_lit_0(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                ConstDecl(Id("x"), FloatType(), FloatLiteral(1)),
+                Break(),
+            ])),
+        ])
+])
+        expect = str(SE.MustInLoop(Break()))
+        self._test(testcase, expect)
+
+    def test_float_lit_1(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                ConstDecl(Id("x"), FloatType(), IntLiteral(1)),
+                Break(),
+            ])),
+        ])
+])
+        expect = str(SE.MustInLoop(Break()))
+        self._test(testcase, expect)
+
+    def test_string_lit_0(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                ConstDecl(Id("x"), StringType(), StringLiteral("x")),
+                Break(),
+            ])),
+        ])
+])
+        expect = str(SE.MustInLoop(Break()))
+        self._test(testcase, expect)
+
+    def test_bool_lit_0(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                ConstDecl(Id("x"), BoolType(), BooleanLiteral(True)),
+                Break(),
+            ])),
+        ])
+])
+        expect = str(SE.MustInLoop(Break()))
+        self._test(testcase, expect)
+
+    def test_null_lit_0(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                ConstDecl(Id("a"), ClassType(Id("A")), NullLiteral()),
+                Break(),
+            ])),
+        ])
+])
+        expect = str(SE.MustInLoop(Break()))
+        self._test(testcase, expect)
+
+    def test_self_lit_0(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                VarDecl(Id("a"), ClassType(Id("Program")), NullLiteral()),
+                Assign(Id("a"), SelfLiteral()),
+                Break(),
+            ])),
+        ])
+])
+        expect = str(SE.MustInLoop(Break()))
+        self._test(testcase, expect)
+
+    def test_self_lit_1(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                VarDecl(Id("a"), ClassType(Id("A")), NullLiteral()),
+                Assign(Id("a"), SelfLiteral()),
+            ])),
+        ])
+])
+        expect = str(SE.TypeMismatchInStatement(Assign(Id("a"), SelfLiteral())))
+        self._test(testcase, expect)
+
 
     def test_array_literal_0(self):
         testcase = \

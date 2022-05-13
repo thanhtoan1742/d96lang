@@ -478,7 +478,7 @@ class StaticChecker(BaseVisitor):
         """
         Self literal has the type of current class.
         """
-        return ValueSymbol(None, True, AST.ClassType(AST.Id(self.context.class_name)))
+        return ValueSymbol(None, False, AST.ClassType(AST.Id(self.context.class_name)))
 
     def visitArrayLiteral(self, ast: AST.ArrayLiteral, visit_param: dict) -> ValueSymbol:
         """
