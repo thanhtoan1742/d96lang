@@ -195,7 +195,7 @@ class SymbolPool:
         Update method return type (overwrite, no check).
         Update if method is still constant (is_constant &= sym.is_constant).
         """
-        method: MethodSymbol = self.get_symbol(sym)
+        method: MethodSymbol = self.get_symbol(sym.name, sym.kind, sym.class_name)
         assert method, \
             f'method "{sym.class_name}.{sym.name}"not found when try to update method'
 
@@ -378,10 +378,10 @@ class StaticChecker(BaseVisitor):
         If method or attribute not found, raise Undeclared.
         """
         if type(ast) == AST.FieldAccess:
-            name: str = self.visit(ast.fieldname)
+            name: str = self.visit(ast.fieldname, visit_param)
             kind = SE.Attribute()
         else:
-            name: str = self.visit(ast.method)
+            name: str = self.visit(ast.method, visit_param)
             kind = SE.Method()
         if type(ast) == AST.CallStmt:
             exception = SE.TypeMismatchInStatement(ast)
@@ -391,29 +391,36 @@ class StaticChecker(BaseVisitor):
 
         has_class = False
         has_instance = False
+        has_symbol = False
         if type(ast.obj) == AST.Id:
             csn = self.visit(ast.obj, visit_param)
             has_class = self.pool.get_symbol(csn, SE.Class()) != None
             sym: ValueSymbol = self.pool.get_symbol(csn, SE.Variable())
             has_instance = sym and type(sym.mtype) == AST.ClassType
+            has_symbol = has_class or has_instance or sym != None
         else:
             sym: ValueSymbol = self.visit_expr(ast.obj, visit_param)
             has_instance = sym and type(sym.mtype) == AST.ClassType
+            has_symbol = sym != None
 
         if name.startswith('$'):
             if has_class:
                 class_name = csn
             elif has_instance:
                 raise SE.IllegalMemberAccess(ast)
-            else:
+            elif has_symbol:
                 raise exception
+            else:
+                raise SE.Undeclared(SE.Class(), csn)
         else:
             if has_instance:
                 class_name = sym.mtype.classname.name
             elif has_class:
                 raise SE.IllegalMemberAccess(ast)
-            else:
+            elif has_symbol:
                 raise exception
+            else:
+                raise SE.Undeclared(SE.Identifier(), csn)
 
         sym = self.pool.get_symbol(name, kind, class_name)
         if not sym:
@@ -780,6 +787,12 @@ class StaticChecker(BaseVisitor):
         visit_param['param'] = ast.param
         self.visit(ast.body, visit_param)
         self.context.exit_method()
+
+        sym: MethodSymbol = self.pool.get_symbol(name, SE.Method(), self.context.class_name)
+        # raise SE.Undeclared(SE.Method(), f"{type(sym)}, {sym.__dict__}, {not sym.ret_type}")
+        if not sym.ret_type:
+            sym.ret_type = AST.VoidType()
+            self.pool.update_method(sym)
 
 
 

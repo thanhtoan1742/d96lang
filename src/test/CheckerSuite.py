@@ -348,6 +348,259 @@ Program([
 
 
 
+
+    def test_call_stmt_0(self):
+        testcase = \
+Program([
+    ClassDecl(
+        Id("Program"),
+        [
+            MethodDecl(Instance(), Id("func"), [], Block([])),
+            MethodDecl(Static(), Id("main"), [], Block([
+                CallStmt(SelfLiteral(), Id("not_func"), [])
+            ])),
+        ]
+    )
+])
+        expect = str(SE.Undeclared(SE.Method(), "not_func"))
+        self._test(testcase, expect)
+
+    def test_call_stmt_1(self):
+        stmt = CallStmt(Id("Program"), Id("func"), [])
+        testcase = \
+Program([
+    ClassDecl(
+        Id("Program"),
+        [
+            MethodDecl(Instance(), Id("func"), [], Block([])),
+            MethodDecl(Static(), Id("main"), [], Block([stmt])),
+        ]
+    )
+])
+        expect = str(SE.IllegalMemberAccess(stmt))
+        self._test(testcase, expect)
+
+    def test_call_stmt_2(self):
+        testcase = \
+Program([
+    ClassDecl(
+        Id("A"),
+        [
+            MethodDecl(Static(), Id("$func"), [], Block([])),
+        ]
+    ),
+    ClassDecl(
+        Id("Program"), [MethodDecl(Static(), Id("main"), [], Block([
+            CallStmt(Id("B"), Id("$func"), [])
+        ])),]
+    )
+])
+        expect = str(SE.Undeclared(SE.Class(), "B"))
+        self._test(testcase, expect)
+
+    def test_call_stmt_3(self):
+        testcase = \
+Program([
+    ClassDecl(
+        Id("A"),
+        [
+            MethodDecl(Static(), Id("$func"), [], Block([])),
+            MethodDecl(Instance(), Id("func"), [], Block([])),
+        ]
+    ),
+    ClassDecl(
+        Id("Program"), [MethodDecl(Static(), Id("main"), [], Block([
+            CallStmt(Id("B"), Id("func"), [])
+        ])),]
+    )
+])
+        expect = str(SE.Undeclared(SE.Identifier(), "B"))
+        self._test(testcase, expect)
+
+    def test_call_stmt_4(self):
+        testcase = \
+Program([
+    ClassDecl(
+        Id("A"),
+        [
+            MethodDecl(Static(), Id("$func"), [], Block([])),
+            MethodDecl(Instance(), Id("func"), [], Block([])),
+        ]
+    ),
+    ClassDecl(
+        Id("Program"), [MethodDecl(Static(), Id("main"), [], Block([
+            VarDecl(Id("a"), ClassType(Id("A"))),
+            CallStmt(Id("a"), Id("$func"), []),
+        ])),]
+    )
+])
+        expect = str(SE.IllegalMemberAccess(CallStmt(Id("a"), Id("$func"), [])))
+        self._test(testcase, expect)
+
+    def test_call_stmt_5(self):
+        testcase = \
+Program([
+    ClassDecl(
+        Id("A"),
+        [
+            MethodDecl(Static(), Id("$func"), [], Block([])),
+            MethodDecl(Instance(), Id("func"), [], Block([])),
+        ]
+    ),
+    ClassDecl(
+        Id("Program"), [MethodDecl(Static(), Id("main"), [], Block([
+            VarDecl(Id("a"), IntType()),
+            CallStmt(Id("a"), Id("func"), []),
+        ])),]
+    )
+])
+        expect = str(SE.TypeMismatchInStatement(CallStmt(Id("a"), Id("func"), [])))
+        self._test(testcase, expect)
+
+    def test_call_stmt_6(self):
+        testcase = \
+Program([
+    ClassDecl(
+        Id("A"),
+        [
+            MethodDecl(Static(), Id("$func"), [], Block([])),
+            MethodDecl(Instance(), Id("func"), [], Block([])),
+        ]
+    ),
+    ClassDecl(
+        Id("Program"), [MethodDecl(Static(), Id("main"), [], Block([
+            VarDecl(Id("a"), IntType()),
+            CallStmt(Id("a"), Id("$func"), []),
+        ])),]
+    )
+])
+        expect = str(SE.TypeMismatchInStatement(CallStmt(Id("a"), Id("$func"), [])))
+        self._test(testcase, expect)
+
+    def test_call_stmt_7(self):
+        testcase = \
+Program([
+    ClassDecl(
+        Id("A"),
+        [
+            MethodDecl(Static(), Id("$func"), [], Block([])),
+            MethodDecl(Instance(), Id("func"), [], Block([])),
+        ]
+    ),
+    ClassDecl(
+        Id("Program"), [MethodDecl(Static(), Id("main"), [], Block([
+            VarDecl(Id("a"), IntType()),
+            CallStmt(Id("A"), Id("$func2"), []),
+        ])),]
+    )
+])
+        expect = str(SE.Undeclared(SE.Method(), "$func2"))
+        self._test(testcase, expect)
+
+    def test_call_stmt_8(self):
+        testcase = \
+Program([
+    ClassDecl(
+        Id("A"),
+        [
+            MethodDecl(Static(), Id("$func"), [], Block([])),
+            MethodDecl(Instance(), Id("func"), [], Block([])),
+        ]
+    ),
+    ClassDecl(
+        Id("Program"), [MethodDecl(Static(), Id("main"), [], Block([
+            VarDecl(Id("a"), IntType()),
+            CallStmt(Id("A"), Id("$func"), [IntLiteral(1)]),
+        ])),]
+    )
+])
+        expect = str(SE.TypeMismatchInStatement(CallStmt(Id("A"), Id("$func"), [IntLiteral(1)])))
+        self._test(testcase, expect)
+
+    def test_call_stmt_9(self):
+        testcase = \
+Program([
+    ClassDecl(
+        Id("A"),
+        [
+            MethodDecl(Static(), Id("$func"), [], Block([])),
+            MethodDecl(Instance(), Id("func"), [], Block([])),
+        ]
+    ),
+    ClassDecl(
+        Id("Program"), [MethodDecl(Static(), Id("main"), [], Block([
+            VarDecl(Id("a"), ClassType(Id("A"))),
+            CallStmt(Id("a"), Id("func"), [IntLiteral(1)]),
+        ])),]
+    )
+])
+        expect = str(SE.TypeMismatchInStatement(CallStmt(Id("a"), Id("func"), [IntLiteral(1)])))
+        self._test(testcase, expect)
+
+    def test_call_stmt_10(self):
+        testcase = \
+Program([
+    ClassDecl(
+        Id("A"),
+        [
+            MethodDecl(Static(), Id("$func"), [], Block([])),
+            MethodDecl(Instance(), Id("func"), [VarDecl(Id("X"), IntType())], Block([])),
+        ]
+    ),
+    ClassDecl(
+        Id("Program"), [MethodDecl(Static(), Id("main"), [], Block([
+            VarDecl(Id("a"), ClassType(Id("A"))),
+            CallStmt(Id("a"), Id("func"), [FloatLiteral(1)]),
+        ])),]
+    )
+])
+        expect = str(SE.TypeMismatchInStatement(CallStmt(Id("a"), Id("func"), [FloatLiteral(1)])))
+        self._test(testcase, expect)
+
+    def test_call_stmt_11(self):
+        testcase = \
+Program([
+    ClassDecl(
+        Id("A"),
+        [
+            MethodDecl(Static(), Id("$func"), [], Block([])),
+            MethodDecl(Instance(), Id("func"), [VarDecl(Id("X"), IntType())], Block([])),
+        ]
+    ),
+    ClassDecl(
+        Id("Program"), [MethodDecl(Static(), Id("main"), [], Block([
+            VarDecl(Id("a"), ClassType(Id("A"))),
+            CallStmt(Id("a"), Id("func"), [IntLiteral(1)]),
+            CallStmt(Id("a"), Id("func"), [FloatLiteral(1)]),
+        ])),]
+    )
+])
+        expect = str(SE.TypeMismatchInStatement(CallStmt(Id("a"), Id("func"), [FloatLiteral(1)])))
+        self._test(testcase, expect)
+
+    def test_call_stmt_12(self):
+        testcase = \
+Program([
+    ClassDecl(
+        Id("A"),
+        [
+            MethodDecl(Static(), Id("$func"), [], Block([])),
+            MethodDecl(Instance(), Id("func"), [VarDecl(Id("X"), FloatType())], Block([])),
+        ]
+    ),
+    ClassDecl(
+        Id("Program"), [MethodDecl(Static(), Id("main"), [], Block([
+            VarDecl(Id("a"), ClassType(Id("A"))),
+            CallStmt(Id("a"), Id("func"), [IntLiteral(1)]),
+            CallStmt(Id("a"), Id("func"), [StringLiteral("a")]),
+        ])),]
+    )
+])
+        expect = str(SE.TypeMismatchInStatement(CallStmt(Id("a"), Id("func"), [StringLiteral("a")])))
+        self._test(testcase, expect)
+
+
+
     def test_method_decl_0(self):
         testcase = \
 Program([
