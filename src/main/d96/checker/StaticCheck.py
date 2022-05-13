@@ -429,6 +429,32 @@ class StaticChecker(BaseVisitor):
 
 
 
+    def visitIntType(self, ast: AST.IntType, visit_param: dict) -> None:
+        pass
+
+    def visitFloatType(self, ast: AST.FloatType, visit_param: dict) -> None:
+        pass
+
+    def visitStringType(self, ast: AST.StringType, visit_param: dict) -> None:
+        pass
+
+    def visitBoolType(self, ast: AST.BoolType, visit_param: dict) -> None:
+        pass
+
+    def visitVoidType(self, ast: AST.VoidType, visit_param: dict) -> None:
+        pass
+
+    def visitClassType(self, ast: AST.ClassType, visit_param: dict) -> None:
+        if not ast.classname:
+            return
+        name: str = self.visit(ast.classname, visit_param)
+        if not self.pool.get_symbol(name, SE.Class()):
+            raise SE.Undeclared(SE.Class(), name)
+
+    def visitArrayType(self, ast: AST.ArrayType, visit_param: dict) -> None:
+        self.visit(ast.eleType, visit_param)
+
+
 
     def visitIntLiteral(self, ast: AST.IntLiteral, visit_param: dict) -> ValueSymbol:
         return ValueSymbol(None, True, AST.IntType())
@@ -467,9 +493,9 @@ class StaticChecker(BaseVisitor):
         eles: List[ValueSymbol] = [self.visit_expr(e, visit_param) for e in ast.value]
         ele_type = eles[0].mtype
         # type has to be the same, not coercible.
-        if not reduce(lambda acc, e: acc and typeis(e.mtype, ele_type), eles):
+        if not reduce(lambda acc, e: acc and typeis(e.mtype, ele_type), eles, True):
             raise SE.IllegalArrayLiteral(ast)
-        is_constant = reduce(lambda acc, e: acc and e.is_constant, eles)
+        is_constant = reduce(lambda acc, e: acc and e.is_constant, eles, True)
         mtype = AST.ArrayType(size, ele_type)
         return ValueSymbol(None, is_constant, mtype)
 
@@ -548,7 +574,7 @@ class StaticChecker(BaseVisitor):
         This works with 1-D array.
         """
         idxs = [self.visit_expr(e, visit_param) for e in ast.idx]
-        if not reduce(lambda acc, v: acc and type(v.mtype) == AST.IntType, idxs):
+        if not reduce(lambda acc, v: acc and type(v.mtype) == AST.IntType, idxs, True):
             raise SE.TypeMismatchInExpression(ast)
 
         arr: ValueSymbol = self.visit_expr(ast.arr, visit_param)
@@ -575,13 +601,11 @@ class StaticChecker(BaseVisitor):
 
     def visitFieldAccess(self, ast: AST.FieldAccess, visit_param: dict) -> AttributeSymbol:
         sym: AttributeSymbol = self.visit_class_member(ast, visit_param)
-        if type(sym) != AST.ClassType:
-            raise SE.TypeMismatchInExpression(ast)
         return sym
-
 
     def visitVarDecl(self, ast: AST.VarDecl, visit_param: dict) -> ValueSymbol:
         name: str = self.visit(ast.variable, visit_param)
+        self.visit(ast.varType, visit_param)
         if ast.varInit:
             value = self.visit_expr(ast.varInit, visit_param)
             if not coercible(value.mtype, ast.varType):
@@ -595,9 +619,10 @@ class StaticChecker(BaseVisitor):
         TEST: no init value.
         """
         name: str = self.visit(ast.constant, visit_param)
-        value = self.visit_expr(ast.value, visit_param)
-        if not value:
+        self.visit(ast.constType, visit_param)
+        if not ast.value:
             raise SE.IllegalConstantExpression(ast.value)
+        value = self.visit_expr(ast.value, visit_param)
         if not value.is_constant:
             raise SE.IllegalConstantExpression(ast.value)
         if type(ast.constType) == AST.VoidType or not coercible(value.mtype, ast.constType):
@@ -662,10 +687,10 @@ class StaticChecker(BaseVisitor):
         if ast.expr3:
             exprs.append(ast.expr3)
         es = [self.visit_expr(e, visit_param) for e in exprs]
-        if not reduce(lambda acc, e: acc and type(e.mtype) == AST.IntType, es):
+        if not reduce(lambda acc, e: acc and type(e.mtype) == AST.IntType, es, True):
             raise SE.TypeMismatchInStatement(ast)
 
-        self.visit(AST.Assign(ast.id, ast.expr1))
+        self.visit(AST.Assign(ast.id, ast.expr1), visit_param)
         self.context.enter_loop()
         self.visit(ast.loop, visit_param)
         self.context.exit_loop()
