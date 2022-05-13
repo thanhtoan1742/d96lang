@@ -594,9 +594,9 @@ class StaticChecker(BaseVisitor):
         """
         sym: MethodSymbol = self.visit_class_member(ast, visit_param)
         if type(sym.ret_type) == SE.VoidType:
-            raise SE.TypeMismatchInStatement(ast)
+            raise SE.TypeMismatchInExpression(ast)
         if not self.check_assign_args_to_param(ast.param, sym.param_types, visit_param):
-            raise SE.TypeMismatchInStatement(ast)
+            raise SE.TypeMismatchInExpression(ast)
         return ValueSymbol(None, sym.is_constant, sym.ret_type)
 
     def visitFieldAccess(self, ast: AST.FieldAccess, visit_param: dict) -> AttributeSymbol:
