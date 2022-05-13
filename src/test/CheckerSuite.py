@@ -179,6 +179,28 @@ Program(
 
 
 
+    def test_type_coercion_0(self):
+        stmt = VarDecl(
+            Id("a"),
+            ArrayType(3, FloatType()),
+            ArrayLiteral([FloatLiteral(0), FloatLiteral(1)])
+        )
+        testcase = \
+Program([
+    ClassDecl(
+        Id("Program"),
+        [
+            MethodDecl(
+                Static(),
+                Id("main"),
+                [],
+                Block([stmt])
+            )
+        ]
+    )
+])
+        expect = str(SE.TypeMismatchInStatement(stmt))
+        self._test(testcase, expect)
 
 
 
@@ -325,27 +347,65 @@ Program([
         self._test(testcase, expect)
 
 
-    def test_type_coercion_0(self):
-        stmt = VarDecl(
-            Id("a"),
-            ArrayType(3, FloatType()),
-            ArrayLiteral([FloatLiteral(0), FloatLiteral(1)])
-        )
+
+    def test_method_decl_0(self):
         testcase = \
 Program([
     ClassDecl(
         Id("Program"),
         [
-            MethodDecl(
-                Static(),
-                Id("main"),
-                [],
-                Block([stmt])
-            )
+            MethodDecl(Instance(), Id("func"), [ ], Block([])),
+            MethodDecl(Instance(), Id("func"), [ ], Block([])),
+            MethodDecl(Static(), Id("main"), [ ], Block([])),
         ]
     )
 ])
-        expect = str(SE.TypeMismatchInStatement(stmt))
+        expect = str(SE.Redeclared(SE.Method(), "func"))
+        self._test(testcase, expect)
+
+    def test_method_decl_1(self):
+        vd = VarDecl(Id("a"), IntType(), IntLiteral(1))
+        testcase = \
+Program([
+    ClassDecl(
+        Id("Program"),
+        [
+            MethodDecl(Instance(), Id("func"), [vd, vd], Block([])),
+            MethodDecl(Instance(), Id("main"), [], Block([])),
+        ]
+    )
+])
+        expect = str(SE.Redeclared(SE.Parameter(), "a"))
+        self._test(testcase, expect)
+
+    def test_method_decl_2(self):
+        vd = VarDecl(Id("a"), IntType(), IntLiteral(1))
+        testcase = \
+Program([
+    ClassDecl(
+        Id("Program"),
+        [
+            MethodDecl(Instance(), Id("func"), [vd], Block([vd])),
+            MethodDecl(Instance(), Id("main"), [], Block([])),
+        ]
+    )
+])
+        expect = str(SE.Redeclared(SE.Variable(), "a"))
+        self._test(testcase, expect)
+
+    def test_method_decl_3(self):
+        vd = VarDecl(Id("a"), IntType(), IntLiteral(1))
+        testcase = \
+Program([
+    ClassDecl(
+        Id("Program"),
+        [
+            MethodDecl(Instance(), Id("func"), [vd], Block([ConstDecl(Id("a"), IntType(), IntLiteral(1))])),
+            MethodDecl(Instance(), Id("main"), [], Block([])),
+        ]
+    )
+])
+        expect = str(SE.Redeclared(SE.Constant(), "a"))
         self._test(testcase, expect)
 
 
@@ -359,7 +419,15 @@ Program([
         expect = str(SE.Undeclared(SE.Class(), "B"))
         self._test(testcase, expect)
 
-
+    def test_class_decl_1(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(Id("A"), []),
+    ClassDecl(Id("Program"), [MethodDecl(Static(), Id("main"), [], Block([])),]),
+])
+        expect = str(SE.Redeclared(SE.Class(), "A"))
+        self._test(testcase, expect)
 
 
 
@@ -389,7 +457,6 @@ Program([
 ])
         expect = str(SE.NoEntryPoint())
         self._test(testcase, expect)
-
 
     def test_entry_point_2(self):
         testcase = \

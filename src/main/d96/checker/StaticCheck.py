@@ -579,7 +579,6 @@ class StaticChecker(BaseVisitor):
             value = self.visit_expr(ast.varInit, visit_param)
             if not coercible(value.mtype, ast.varType):
                 raise SE.TypeMismatchInStatement(ast)
-
         return ValueSymbol(name, False, ast.varType)
 
     def visitConstDecl(self, ast: AST.ConstDecl, visit_param: dict) -> ValueSymbol:
@@ -742,9 +741,9 @@ class StaticChecker(BaseVisitor):
             # if is VarDecl or ConstDecl
             if sym and isinstance(sym, ValueSymbol):
                 if sym.is_constant:
-                    self.pool.add_symbol(VariableSymbol(sym.name, sym.is_constant, sym.mtype))
-                else:
                     self.pool.add_symbol(ConstantSymbol(sym.name, sym.is_constant, sym.mtype))
+                else:
+                    self.pool.add_symbol(VariableSymbol(sym.name, sym.is_constant, sym.mtype))
         self.pool.dec_scope()
 
     def visitMethodDecl(self, ast: AST.MethodDecl, visit_param: dict) -> None:
