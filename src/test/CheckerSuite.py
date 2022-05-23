@@ -468,6 +468,206 @@ Program([
 
 
 
+    def test_new_expr_0(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(Id("B"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                VarDecl(Id("a"), ClassType(Id("A")), NewExpr(Id("A"), [])),
+                Break(),
+            ])),
+        ])
+])
+        expect = str(SE.MustInLoop(Break()))
+        self._test(testcase, expect)
+
+    def test_new_expr_1(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(Id("B"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                VarDecl(Id("a"), ClassType(Id("A")), NewExpr(Id("A"), [IntLiteral(1)])),
+            ])),
+        ])
+])
+        expect = str(SE.TypeMismatchInExpression(
+            NewExpr(Id("A"), [IntLiteral(1)])
+        ))
+        self._test(testcase, expect)
+
+    def test_new_expr_2(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), [MethodDecl(Instance(), Id("Constructor"), [VarDecl(Id("x"), IntType())], Block([]))]),
+    ClassDecl(Id("B"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                VarDecl(Id("a"), ClassType(Id("A")), NewExpr(Id("A"), [FloatLiteral(1)])),
+            ])),
+        ])
+])
+        expect = str(SE.TypeMismatchInExpression(
+            NewExpr(Id("A"), [FloatLiteral(1)])
+        ))
+        self._test(testcase, expect)
+
+
+
+    def test_array_cell_0(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(Id("B"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                VarDecl(Id("a"), ArrayType(3, IntType())),
+                VarDecl(Id("i"), IntType()),
+                Assign(Id("i"), ArrayCell(Id("a"), [IntLiteral(0)])),
+                Break(),
+            ])),
+        ])
+])
+        expect = str(SE.MustInLoop(Break()))
+        self._test(testcase, expect)
+
+    def test_array_cell_1(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(Id("B"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                VarDecl(Id("a"), ArrayType(3, IntType())),
+                VarDecl(Id("i"), IntType()),
+                Assign(Id("i"), ArrayCell(Id("a"), [FloatLiteral(0)])),
+            ])),
+        ])
+])
+        expect = str(SE.TypeMismatchInExpression(ArrayCell(Id("a"), [FloatLiteral(0)])))
+        self._test(testcase, expect)
+
+    def test_array_cell_2(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(Id("B"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                VarDecl(Id("a"), ArrayType(3, IntType())),
+                VarDecl(Id("i"), IntType()),
+                Assign(Id("i"), ArrayCell(Id("a"), [Id("i")])),
+                Break(),
+            ])),
+        ])
+])
+        expect = str(SE.MustInLoop(Break()))
+        self._test(testcase, expect)
+
+    def test_array_cell_3(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(Id("B"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                VarDecl(Id("a"), ArrayType(3, IntType())),
+                VarDecl(Id("res"), IntType()),
+                VarDecl(Id("i"), FloatType()),
+                Assign(Id("res"), ArrayCell(Id("a"), [Id("i")])),
+                Break(),
+            ])),
+        ])
+])
+        expect = str(SE.TypeMismatchInExpression(ArrayCell(Id("a"), [Id("i")])))
+        self._test(testcase, expect)
+
+    def test_array_cell_4(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(Id("B"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                VarDecl(Id("a"), ArrayType(3, IntType())),
+                VarDecl(Id("i"), FloatType()),
+                Assign(Id("i"), ArrayCell(Id("a"), [IntLiteral(0)])),
+                Break(),
+            ])),
+        ])
+])
+        expect = str(SE.MustInLoop(Break()))
+        self._test(testcase, expect)
+
+    def test_array_cell_5(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(Id("B"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                VarDecl(Id("a"), ArrayType(2, ArrayType(1, IntType()))),
+                VarDecl(Id("i"), IntType()),
+                Assign(Id("i"), ArrayCell(Id("a"), [IntLiteral(0), IntLiteral(0)])),
+                Break(),
+            ])),
+        ])
+])
+        expect = str(SE.MustInLoop(Break()))
+        self._test(testcase, expect)
+
+    def test_array_cell_6(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(Id("B"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                VarDecl(Id("a"), ArrayType(2, ArrayType(1, IntType()))),
+                VarDecl(Id("i"), IntType()),
+                Assign(Id("i"), ArrayCell(Id("a"), [IntLiteral(0), FloatLiteral(0)])),
+                Break(),
+            ])),
+        ])
+])
+        expect = str(SE.TypeMismatchInExpression(ArrayCell(Id("a"), [IntLiteral(0), FloatLiteral(0)])))
+        self._test(testcase, expect)
+
+    def test_array_cell_7(self):
+        testcase = \
+Program([
+    ClassDecl(Id("A"), []),
+    ClassDecl(Id("B"), []),
+    ClassDecl(
+        Id("Program"), [
+            MethodDecl(Static(), Id("main"), [], Block([
+                VarDecl(Id("a"), ArrayType(2, ArrayType(1, IntType()))),
+                VarDecl(Id("i"), StringType()),
+                Assign(Id("i"), ArrayCell(Id("a"), [IntLiteral(0), IntLiteral(0)])),
+                Break(),
+            ])),
+        ])
+])
+        expect = str(SE.TypeMismatchInStatement(
+            Assign(Id("i"), ArrayCell(Id("a"), [IntLiteral(0), IntLiteral(0)]))
+        ))
+        self._test(testcase, expect)
+
+
+
     def test_call_expr_0(self):
         testcase = \
 Program([
