@@ -14,6 +14,7 @@ import AST
 
 
 
+Type = AST.Type
 IntType = AST.IntType
 FloatType = AST.FloatType
 BoolType = AST.BoolType
@@ -21,11 +22,11 @@ StringType = AST.StringType
 VoidType = AST.VoidType
 ArrayType = AST.ArrayType
 
-class ClassType(AST.Type):
+class ClassType(Type):
     def __init__(self, className: str):
         self.className = className
 
-class MethodType(AST.Type):
+class MethodType(Type):
     def __init__(self, parTypes, retType) -> None:
         self.parTypes = parTypes
         self.retType = retType
